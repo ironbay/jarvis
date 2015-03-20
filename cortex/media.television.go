@@ -2,7 +2,6 @@ package cortex
 
 import (
     "github.com/ironbay/jarvis/cortex/reference"
-    "log"
     "strings"
 )
 
