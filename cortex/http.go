@@ -4,6 +4,7 @@ import (
     "fmt"
     "github.com/julienschmidt/httprouter"
     "io/ioutil"
+    "log"
     "net/http"
 )
 
@@ -16,7 +17,7 @@ func init() {
         if err != nil {
             return
         }
-        fmt.Println(string(data))
+        log.Println(kind)
         Event.EmitJson(kind, data)
         fmt.Fprint(w, "ok")
     })
