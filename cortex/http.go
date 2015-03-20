@@ -4,7 +4,6 @@ import (
     "fmt"
     "github.com/julienschmidt/httprouter"
     "io/ioutil"
-    "log"
     "net/http"
 )
 
