@@ -17,7 +17,6 @@ func init() {
         if err != nil {
             return
         }
-        log.Println(kind)
         Event.EmitJson(kind, data)
         fmt.Fprint(w, "ok")
     })
