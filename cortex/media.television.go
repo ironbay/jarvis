@@ -47,7 +47,9 @@ func init() {
 
     Pipe.Listen("follow show (.+)", func(l Listener, args []string) {
         r, _ := reference.Omdb.Search(args[1], "series")
-        log.Println(r)
+        if r["Response"].(string) != "True" {
+            return
+        }
         m := Show{r["Title"].(string)}
         Event.Emit(&m)
     })
