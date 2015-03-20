@@ -1,5 +1,6 @@
 package cortex
 
+/*
 import (
     "github.com/ironbay/jarvis/cortex/reference"
 )
@@ -10,3 +11,4 @@ func init() {
         l.Send(r["weather"].(map[string]interface{})["main"].(string))
     })
 }
+*/
