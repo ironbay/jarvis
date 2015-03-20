@@ -1,6 +1,7 @@
 package cortex
 
 import (
+    "github.com/ironbay/jarvis/cortex/reference"
     "strings"
 )
 
@@ -44,7 +45,8 @@ func init() {
     })
 
     Pipe.Listen("follow show (.+)", func(l Listener, args []string) {
-        m := Show{args[1]}
+        r, _ := reference.Omdb.Search(args[1], "series")
+        m := Show{r["Title"].(string)}
         Event.Emit(&m)
     })
 
