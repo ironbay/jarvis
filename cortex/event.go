@@ -42,6 +42,10 @@ func (e *event) Emit(m interface{}) {
 
 func (e *event) EmitJson(kind string, data []byte) {
     t := e.reflect[kind]
+    if t == nil {
+        log.Println("No model", kind)
+        return
+    }
     v := reflect.New(t)
     i := v.Interface()
     json.Unmarshal(data, i)
