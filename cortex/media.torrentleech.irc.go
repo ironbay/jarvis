@@ -14,7 +14,6 @@ type TorrentUpload struct {
 }
 
 func init() {
-    return
     name := regexp.MustCompile("Name:'([^']+)")
     category := regexp.MustCompile("<([^>]+)")
     id := regexp.MustCompile("torrent/(\\d+)")
