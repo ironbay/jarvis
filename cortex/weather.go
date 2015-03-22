@@ -25,7 +25,7 @@ func init() {
         Event.Emit(m)
     })
 
-    Cron.AddFunc("0 54 10 * * *", func() {
+    Cron.AddFunc("0 57 10 * * *", func() {
         m := new(Weather)
         m.Forecast, _ = forecast.Get("401c7658a2ad5cd62d2671286e1a4c4d", "40.78", "-73.97", "now", forecast.US)
         Event.Emit(m)
