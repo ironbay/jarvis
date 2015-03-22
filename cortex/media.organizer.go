@@ -73,10 +73,11 @@ func init() {
 
     })
 
-    macthes := []*regexp.Regexp{
+    regex := []*regexp.Regexp{
         regexp.MustCompile("(.+)\\W(\\d{4})"),
         regexp.MustCompile("(.+)\\Ws\\d"),
         regexp.MustCompile("(.+)\\W\\d")}
+
     Event.Listen(func(m *FileDownload) {
         output := movie
         lower := strings.ToLower(m.Name)
@@ -86,7 +87,7 @@ func init() {
         }
         if strings.Contains(lower, "hdtv") {
             output = tv
-            for _, r := range macthes {
+            for _, r := range regex {
                 matches := r.FindStringSubmatch(lower)
                 if len(matches) > 0 {
                     output += matches[1] + "/"
