@@ -28,6 +28,7 @@ var Hangouts = func() *hangouts {
     c.HandleFunc("connected", func(conn *irc.Conn, line *irc.Line) {
         conn.Join("#Jarvis[37b58e0]")
         conn.Join("#Broo[a302fda]")
+        Event.Message("Initialized")
     })
 
     c.HandleFunc(irc.PRIVMSG, func(conn *irc.Conn, line *irc.Line) {
@@ -39,7 +40,7 @@ var Hangouts = func() *hangouts {
         if m.From == "JarvisIronbay" {
             return
         }
-        Pipe.Handle(r, m.Message)
+        Pipe.Handle(r, m.Message, m.From)
     })
 
     c.HandleFunc("disconnected", func(conn *irc.Conn, line *irc.Line) {

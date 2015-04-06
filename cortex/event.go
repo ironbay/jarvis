@@ -40,6 +40,18 @@ func (e *event) Emit(m interface{}) {
     e.emitValue(v)
 }
 
+func (e *event) Error(msg string) {
+    err := new(Error)
+    err.Message = msg
+    e.Emit(err)
+}
+
+func (e *event) Message(msg string) {
+    m := new(Message)
+    m.Message = msg
+    e.Emit(m)
+}
+
 func (e *event) EmitJson(kind string, data []byte) {
     t := e.reflect[kind]
     if t == nil {

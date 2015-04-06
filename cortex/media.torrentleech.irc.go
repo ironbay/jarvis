@@ -25,6 +25,7 @@ func init() {
     c := irc.Client(cfg)
 
     c.HandleFunc("connected", func(conn *irc.Conn, line *irc.Line) {
+        Event.Message("Connected to Torrentleech")
         conn.Join("#tlannounces")
     })
 
@@ -38,6 +39,7 @@ func init() {
     })
 
     c.HandleFunc("disconnected", func(conn *irc.Conn, line *irc.Line) {
+        Event.Error("Reconnecting to Torrentleech...")
     })
 
     if err := c.Connect(); err != nil {

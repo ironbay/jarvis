@@ -7,27 +7,49 @@ import (
     "regexp"
 )
 
-type Alert interface {
-    Alert() string
-}
-
 type Listener interface {
     Send(string)
+}
+
+type Context struct {
+    Listener
+    User string
+}
+
+func (ctx *Context) Listen(exp string, cb func(*Context, []string)) {
+    cmd := command{
+        Regex:    regexp.MustCompile("(?i)" + exp),
+        Callback: cb}
+    arr := Pipe.contextual[ctx.User]
+    if arr == nil {
+        arr = make([]*command, 0)
+    }
+    Pipe.contextual[ctx.User] = append(arr, &cmd)
 }
 
 type Input struct {
     Text     string
     Listener Listener
+    User     string
 }
 
 type pipe struct {
-    Global []*command
-    Once   []*command
+    global     []*command
+    contextual map[string][]*command
 }
 
 type command struct {
     Regex    *regexp.Regexp
-    Callback func(Listener, []string)
+    Callback func(*Context, []string)
+}
+
+func (cmd *command) Handle(ctx *Context, input string) bool {
+    matches := cmd.Regex.FindStringSubmatch(input)
+    if matches == nil {
+        return false
+    }
+    go cmd.Callback(ctx, matches)
+    return true
 }
 
 var Pipe = func() *pipe {
@@ -45,36 +67,39 @@ var Pipe = func() *pipe {
     })
 
     r := new(pipe)
-    r.Global = make([]*command, 0)
-    r.Once = make([]*command, 0)
+    r.global = make([]*command, 0)
+    r.contextual = make(map[string][]*command, 0)
     Event.Listen(func(m *Input) {
-        r.Handle(m.Listener, m.Text)
+        r.Handle(m.Listener, m.Text, m.User)
     })
 
     return r
 }()
 
-func (p *pipe) Listen(exp string, cb func(Listener, []string)) {
+func (p *pipe) Global(exp string, cb func(*Context, []string)) {
     cmd := command{
         Regex:    regexp.MustCompile("(?i)" + exp),
         Callback: cb}
-    p.Global = append(p.Global, &cmd)
+    p.global = append(p.global, &cmd)
 }
 
-func (p *pipe) Next(exp string, cb func(Listener, []string)) {
-    cmd := command{
-        Regex:    regexp.MustCompile("(?i)" + exp),
-        Callback: cb}
-    p.Once = append(p.Once, &cmd)
-}
-
-func (p *pipe) Handle(listener Listener, input string) {
-    for _, cmd := range append(p.Global, p.Once...) {
-        matches := cmd.Regex.FindStringSubmatch(input)
-        if matches == nil {
-            continue
-        }
-        go cmd.Callback(listener, matches)
+func (p *pipe) Handle(listener Listener, input string, user string) {
+    context := new(Context)
+    context.Listener = listener
+    context.User = user
+    for _, cmd := range append(p.global) {
+        cmd.Handle(context, input)
     }
-    p.Once = make([]*command, 0)
+
+    contextual := p.contextual[user]
+    if contextual == nil {
+        return
+    }
+    invalid := make([]*command, 0)
+    for _, cmd := range contextual {
+        if !cmd.Handle(context, input) {
+            invalid = append(invalid, cmd)
+        }
+    }
+    p.contextual[user] = invalid
 }

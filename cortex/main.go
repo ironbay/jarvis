@@ -9,32 +9,14 @@ import (
 func Run() {
     d := make([]Show, 0)
     Database.Get(&d)
-
-    Pipe.Listen("(bitch|fa..ot)", func(l Listener, args []string) {
-        l.Send("You the " + args[1])
-    })
-
-    Pipe.Listen("zeeshan", func(l Listener, args []string) {
-        l.Send("Zeeshan? Isn't he always wrong")
-    })
-
-    Pipe.Listen("jarvis$", func(l Listener, args []string) {
-        l.Send("What up")
-    })
-
-    Pipe.Listen("anime", func(l Listener, args []string) {
-        l.Send("Anime sucks")
-    })
-
-    Pipe.Listen("halo", func(l Listener, args []string) {
-        l.Send("You suck at halo")
-    })
-
-    Pipe.Listen("lmao", func(l Listener, args []string) {
-        l.Send("Hahaha")
-    })
-
     log.Println("Initialized")
+
+    Pipe.Global("^jarvis", func(c *Context, matches []string) {
+        c.Send("Hello " + c.User)
+        c.Listen("how are you", func(c *Context, matches []string) {
+            c.Send("I'm doing great " + c.User)
+        })
+    })
 
 }
 

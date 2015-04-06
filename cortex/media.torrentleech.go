@@ -1,9 +1,11 @@
 package cortex
 
 import (
+    "fmt"
     "github.com/PuerkitoBio/goquery"
     "log"
     "net/http"
+    "strconv"
 )
 
 type torrentleech struct {
@@ -18,10 +20,31 @@ var Torrentleech = func() *torrentleech {
     m := torrentleech{
         Key: "c7afa073572a4ee09f8c"}
 
-    Pipe.Listen("download (.+)", func(l Listener, args []string) {
+    Pipe.Global("download (.+)", func(l *Context, args []string) {
         matches := m.Search(args[1])
         if len(matches) == 0 {
             l.Send("No matches found")
+            return
+        }
+        if len(matches) > 0 {
+            l.Send("Which one?")
+            for i := 0; i < 3; i++ {
+                if i >= len(matches) {
+                    break
+                }
+                l.Send(fmt.Sprintf("%v. %v", i, matches[i].Name))
+            }
+            l.Listen("^(\\d)$", func(ctx *Context, args []string) {
+                index, _ := strconv.Atoi(args[1])
+                if index >= len(matches) {
+                    l.Send("Invalid choice")
+                    return
+                }
+                m := new(TorrentStart)
+                m.Url = matches[index].Url
+                Event.Emit(m)
+                l.Send("Downloading " + matches[index].Name)
+            })
             return
         }
         m := new(TorrentStart)

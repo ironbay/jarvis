@@ -24,7 +24,5 @@ var Weather = func() *weather {
     w := new(weather)
     client := snooze.Client{Root: "http://api.openweathermap.org"}
     client.Create(w)
-
     return w
-
 }()
