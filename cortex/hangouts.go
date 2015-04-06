@@ -3,10 +3,12 @@ package cortex
 import (
     irc "github.com/fluffle/goirc/client"
     "log"
+    "time"
 )
 
 type hangouts struct {
     Client *irc.Conn
+    buffer chan string
 }
 
 type Hangout struct {
@@ -17,6 +19,12 @@ type Hangout struct {
 var Hangouts = func() *hangouts {
 
     var r hangouts
+    r.buffer = make(chan string)
+    timer := time.NewTimer(time.Second)
+    go func() {
+        <-timer.C
+        r.Client.Privmsg("#Jarvis[37b58e0]", <-r.buffer)
+    }()
 
     cfg := irc.NewConfig("jarvis")
     cfg.SSL = false
@@ -58,5 +66,5 @@ var Hangouts = func() *hangouts {
 }()
 
 func (h hangouts) Send(msg string) {
-    h.Client.Privmsg("#Jarvis[37b58e0]", msg)
+    h.buffer <- msg
 }
