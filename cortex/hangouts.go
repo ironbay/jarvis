@@ -20,10 +20,12 @@ var Hangouts = func() *hangouts {
 
     var r hangouts
     r.buffer = make(chan string)
-    timer := time.NewTimer(time.Second)
     go func() {
-        <-timer.C
-        r.Client.Privmsg("#Jarvis[37b58e0]", <-r.buffer)
+        for {
+            msg := <-r.buffer
+            r.Client.Privmsg("#Jarvis[37b58e0]", msg)
+            time.Sleep(time.Second)
+        }
     }()
 
     cfg := irc.NewConfig("jarvis")
