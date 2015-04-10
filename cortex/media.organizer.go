@@ -58,19 +58,23 @@ func init() {
     }
 
     Event.Listen(func(m *TorrentFinished) {
-
-        Process.Run("unrar -r e " + m.Path + "/*.rar " + root)
-        r, _ := ioutil.ReadDir(m.Path)
-        for _, p := range r {
-            ok, _ := regexp.MatchString("(avi|mp4|mkv)$", p.Name())
-            if !ok {
-                continue
+        if ok, _ := regexp.MatchString("(avi|mp4|mkv)$", m.Path); ok {
+            info, _ := os.Stat(m.Path)
+            data, _ := ioutil.ReadFile(m.Path)
+            ioutil.WriteFile(root+info.Name(), data, 0755)
+        } else {
+            Process.Run("unrar -r e " + m.Path + "/*.rar " + root)
+            r, _ := ioutil.ReadDir(m.Path)
+            for _, p := range r {
+                ok, _ := regexp.MatchString("(avi|mp4|mkv)$", p.Name())
+                if !ok {
+                    continue
+                }
+                data, _ := ioutil.ReadFile(m.Path + "/" + p.Name())
+                ioutil.WriteFile(root+p.Name(), data, 0755)
             }
-            data, _ := ioutil.ReadFile(m.Path + "/" + p.Name())
-            ioutil.WriteFile(root+p.Name(), data, 0755)
         }
         classify()
-
     })
 
     regex := []*regexp.Regexp{
