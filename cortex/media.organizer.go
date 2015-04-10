@@ -59,7 +59,11 @@ func init() {
 
     Event.Listen(func(m *TorrentFinished) {
         if ok, _ := regexp.MatchString("(avi|mp4|mkv)$", m.Path); ok {
-            info, _ := os.Stat(m.Path)
+            info, err := os.Stat(m.Path)
+            if err != nil {
+                Event.Error(err.Error())
+                return
+            }
             data, _ := ioutil.ReadFile(m.Path)
             ioutil.WriteFile(root+info.Name(), data, 0755)
         } else {
