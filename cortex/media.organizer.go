@@ -28,7 +28,7 @@ func init() {
     tv := "/media/tv/"
     movie := "/media/movies/"
 
-    var clean = func() {
+    var clean = func(context *Context) {
         for _, p := range []string{tv, movie} {
             r, _ := ioutil.ReadDir(p)
             now := time.Now()
@@ -38,30 +38,30 @@ func init() {
                         Path: p + "/" + f.Name(),
                         Name: f.Name()}
                     os.Remove(m.Path)
-                    Event.Emit(&m)
+                    Event.Emit(&m, context)
                 }
             }
         }
     }
 
     Cron.AddFunc("@daily", func() {
-        clean()
+        clean(NoContext())
     })
 
-    var classify = func() {
+    var classify = func(context *Context) {
         r, _ := ioutil.ReadDir(root)
         for _, p := range r {
             Event.Emit(&FileDownload{
                 Path: root + p.Name(),
-                Name: p.Name()})
+                Name: p.Name()}, context)
         }
     }
 
-    Event.Listen(func(m *TorrentFinished) {
+    Event.Listen(func(m *TorrentFinished, context *Context) {
         if ok, _ := regexp.MatchString("(avi|mp4|mkv)$", m.Path); ok {
             info, err := os.Stat(m.Path)
             if err != nil {
-                Event.Error(err.Error())
+                Event.Error(err.Error(), context)
                 return
             }
             data, _ := ioutil.ReadFile(m.Path)
@@ -78,7 +78,7 @@ func init() {
                 ioutil.WriteFile(root+p.Name(), data, 0755)
             }
         }
-        classify()
+        classify(context)
     })
 
     regex := []*regexp.Regexp{
@@ -86,7 +86,7 @@ func init() {
         regexp.MustCompile("(.+)\\Ws\\d"),
         regexp.MustCompile("(.+)\\W\\d")}
 
-    Event.Listen(func(m *FileDownload) {
+    Event.Listen(func(m *FileDownload, context *Context) {
         output := movie
         lower := strings.ToLower(m.Name)
         if strings.Contains(lower, "sample") {
@@ -109,5 +109,5 @@ func init() {
         os.Chtimes(output, time.Now(), time.Now())
     })
 
-    classify()
+    classify(NoContext())
 }

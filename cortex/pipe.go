@@ -16,15 +16,22 @@ type Context struct {
     User string
 }
 
-func (ctx *Context) Listen(exp string, cb func(*Context, []string)) {
+func NoContext() *Context {
+    context := new(Context)
+    context.User = "daemon"
+    return context
+}
+
+func (ctx *Context) Listen(exp string) []string {
     cmd := command{
-        Regex:    regexp.MustCompile("(?i)" + exp),
-        Callback: cb}
+        Regex:   regexp.MustCompile("(?i)" + exp),
+        Channel: make(chan []string, 0)}
     arr := Pipe.contextual[ctx.User]
     if arr == nil {
         arr = make([]*command, 0)
     }
     Pipe.contextual[ctx.User] = append(arr, &cmd)
+    return <-cmd.Channel
 }
 
 type Input struct {
@@ -41,6 +48,7 @@ type pipe struct {
 type command struct {
     Regex    *regexp.Regexp
     Callback func(*Context, []string)
+    Channel  chan []string
 }
 
 func (cmd *command) Handle(ctx *Context, input string) bool {
@@ -48,20 +56,25 @@ func (cmd *command) Handle(ctx *Context, input string) bool {
     if matches == nil {
         return false
     }
-    go cmd.Callback(ctx, matches)
+    if cmd.Callback != nil {
+        go cmd.Callback(ctx, matches)
+    }
+    if cmd.Channel != nil {
+        cmd.Channel <- matches
+    }
     return true
 }
 
 var Pipe = func() *pipe {
-    Event.Listen(func(m fmt.Stringer) {
+    Event.Listen(func(m fmt.Stringer, context *Context) {
         log.Println(m)
     })
 
-    Event.Listen(func(m Alert) {
+    Event.Listen(func(m Alert, context *Context) {
         log.Println(m.Alert())
     })
 
-    Event.Listen(func(m interface{}) {
+    Event.Listen(func(m interface{}, context *Context) {
         json, _ := json.Marshal(m)
         log.Println(string(json))
     })
@@ -69,8 +82,8 @@ var Pipe = func() *pipe {
     r := new(pipe)
     r.global = make([]*command, 0)
     r.contextual = make(map[string][]*command, 0)
-    Event.Listen(func(m *Input) {
-        r.Handle(m.Listener, m.Text, m.User)
+    Event.Listen(func(m *Input, context *Context) {
+        r.Handle(m.Text, context)
     })
 
     return r
@@ -83,15 +96,12 @@ func (p *pipe) Global(exp string, cb func(*Context, []string)) {
     p.global = append(p.global, &cmd)
 }
 
-func (p *pipe) Handle(listener Listener, input string, user string) {
-    context := new(Context)
-    context.Listener = listener
-    context.User = user
+func (p *pipe) Handle(input string, context *Context) {
     for _, cmd := range append(p.global) {
         cmd.Handle(context, input)
     }
 
-    contextual := p.contextual[user]
+    contextual := p.contextual[context.User]
     if contextual == nil {
         return
     }
@@ -101,5 +111,5 @@ func (p *pipe) Handle(listener Listener, input string, user string) {
             invalid = append(invalid, cmd)
         }
     }
-    p.contextual[user] = invalid
+    p.contextual[context.User] = invalid
 }

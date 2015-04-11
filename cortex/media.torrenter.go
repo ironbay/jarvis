@@ -20,7 +20,7 @@ func init() {
 
     downloaded := "/media/torrents/downloaded/"
 
-    Event.Listen(func(model *TorrentStart) {
+    Event.Listen(func(model *TorrentStart, context *Context) {
         path := downloaded + hash(model.Url) + ".torrent"
         out, _ := os.Create(path)
         defer out.Close()
@@ -30,10 +30,10 @@ func init() {
 
         m := ProcessStart{
             Command: "deluge-console add " + path}
-        Event.Emit(&m)
+        Event.Emit(&m, context)
     })
 
-    Event.Listen(func(model *TorrentFinished) {
+    Event.Listen(func(model *TorrentFinished, context *Context) {
 
     })
 }

@@ -16,7 +16,7 @@ type ProcessStart struct {
 }
 
 func init() {
-    Event.Listen(func(model *ProcessStart) {
+    Event.Listen(func(model *ProcessStart, context *Context) {
         Process.Run(model.Command)
     })
 }

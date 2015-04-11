@@ -22,12 +22,12 @@ func init() {
     Pipe.Global("weather", func(l *Context, args []string) {
         m := new(Weather)
         m.Forecast, _ = forecast.Get("401c7658a2ad5cd62d2671286e1a4c4d", "40.78", "-73.97", "now", forecast.US)
-        Event.Emit(m)
+        Event.Emit(m, l)
     })
 
     Cron.AddFunc("0 0 10 * * *", func() {
         m := new(Weather)
         m.Forecast, _ = forecast.Get("401c7658a2ad5cd62d2671286e1a4c4d", "40.78", "-73.97", "now", forecast.US)
-        Event.Emit(m)
+        Event.Emit(m, NoContext())
     })
 }

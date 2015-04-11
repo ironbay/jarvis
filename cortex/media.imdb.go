@@ -11,7 +11,7 @@ type Imdb struct {
 }
 
 func init() {
-    Event.Listen(func(m *Browse) {
+    Event.Listen(func(m *Browse, context *Context) {
         if !strings.Contains(m.Url, "imdb.com") {
             return
         }
@@ -27,7 +27,7 @@ func init() {
         if r.Name == "" {
             return
         }
-        Event.Emit(r)
+        Event.Emit(r, context)
 
     })
 }

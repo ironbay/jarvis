@@ -38,19 +38,22 @@ var Hangouts = func() *hangouts {
     c.HandleFunc("connected", func(conn *irc.Conn, line *irc.Line) {
         conn.Join("#Jarvis[37b58e0]")
         conn.Join("#Broo[a302fda]")
-        Event.Message("Initialized")
+        Event.Message("Initialized", NoContext())
     })
 
     c.HandleFunc(irc.PRIVMSG, func(conn *irc.Conn, line *irc.Line) {
         m := Hangout{line.Text(), line.Nick}
-        Event.Emit(&m)
+        context := new(Context)
+        context.Listener = r
+        context.User = line.Nick
+        Event.Emit(&m, context)
     })
 
-    Event.Listen(func(m *Hangout) {
+    Event.Listen(func(m *Hangout, context *Context) {
         if m.From == "JarvisIronbay" {
             return
         }
-        Pipe.Handle(r, m.Message, m.From)
+        Pipe.Handle(m.Message, context)
     })
 
     c.HandleFunc("disconnected", func(conn *irc.Conn, line *irc.Line) {
@@ -60,7 +63,7 @@ var Hangouts = func() *hangouts {
         log.Printf("Connection error: %s\n", err)
     }
 
-    Event.Listen(func(m Alert) {
+    Event.Listen(func(m Alert, context *Context) {
         r.Send(m.Alert())
     })
 

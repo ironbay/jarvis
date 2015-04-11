@@ -13,9 +13,8 @@ func Run() {
 
     Pipe.Global("^jarvis", func(c *Context, matches []string) {
         c.Send("Hello " + c.User)
-        c.Listen("how are you", func(c *Context, matches []string) {
-            c.Send("I'm doing great " + c.User)
-        })
+        c.Listen("how are you")
+        c.Send("I'm doing fantastic " + c.User)
     })
 
 }

@@ -20,37 +20,36 @@ var Torrentleech = func() *torrentleech {
     m := torrentleech{
         Key: "c7afa073572a4ee09f8c"}
 
-    Pipe.Global("download (.+)", func(l *Context, args []string) {
+    Pipe.Global("download (.+)", func(ctx *Context, args []string) {
         matches := m.Search(args[1])
         if len(matches) == 0 {
-            l.Send("No matches found")
+            ctx.Send("No matches found")
             return
         }
         if len(matches) > 0 {
-            l.Send("Which one?")
+            ctx.Send("Which one?")
             for i := 0; i < 3; i++ {
                 if i >= len(matches) {
                     break
                 }
-                l.Send(fmt.Sprintf("%v. %v", i, matches[i].Name))
+                ctx.Send(fmt.Sprintf("%v. %v", i, matches[i].Name))
             }
-            l.Listen("^(\\d)$", func(ctx *Context, args []string) {
-                index, _ := strconv.Atoi(args[1])
-                if index >= len(matches) {
-                    l.Send("Invalid choice")
-                    return
-                }
-                m := new(TorrentStart)
-                m.Url = matches[index].Url
-                Event.Emit(m)
-                l.Send("Downloading " + matches[index].Name)
-            })
+            args = ctx.Listen("^(\\d)$")
+            index, _ := strconv.Atoi(args[1])
+            if index >= len(matches) {
+                ctx.Send("Invalid choice")
+                return
+            }
+            m := new(TorrentStart)
+            m.Url = matches[index].Url
+            Event.Emit(m, ctx)
+            ctx.Send("Downloading " + matches[index].Name)
             return
         }
         m := new(TorrentStart)
         m.Url = matches[0].Url
-        Event.Emit(m)
-        l.Send("Downloading " + matches[0].Name)
+        Event.Emit(m, ctx)
+        ctx.Send("Downloading " + matches[0].Name)
     })
 
     return &m

@@ -20,11 +20,11 @@ func (e *Message) Alert() string {
 }
 
 func init() {
-    Event.Listen(func(*Message) {
+    Event.Listen(func(m *Message, context *Context) {
 
     })
 
-    Event.Listen(func(*Error) {
+    Event.Listen(func(e *Error, context *Context) {
 
     })
 }

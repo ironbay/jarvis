@@ -25,7 +25,7 @@ func init() {
     c := irc.Client(cfg)
 
     c.HandleFunc("connected", func(conn *irc.Conn, line *irc.Line) {
-        Event.Message("Connected to Torrentleech")
+        Event.Message("Connected to Torrentleech", NoContext())
         conn.Join("#tlannounces")
     })
 
@@ -35,11 +35,11 @@ func init() {
         model.Name = name.FindStringSubmatch(text)[1]
         model.Category = category.FindStringSubmatch(text)[1]
         model.Url = "http://www.torrentleech.org/rss/download/" + id.FindStringSubmatch(text)[1] + "/" + Torrentleech.Key + "/download"
-        Event.Emit(model)
+        Event.Emit(model, NoContext())
     })
 
     c.HandleFunc("disconnected", func(conn *irc.Conn, line *irc.Line) {
-        Event.Error("Reconnecting to Torrentleech...")
+        Event.Error("Reconnecting to Torrentleech...", NoContext())
     })
 
     if err := c.Connect(); err != nil {

@@ -18,7 +18,7 @@ func (s *Show) Alert() string {
 }
 
 func init() {
-    Event.Listen(func(model *TorrentUpload) {
+    Event.Listen(func(model *TorrentUpload, context *Context) {
         if model.Category != "TV :: Episodes" {
             return
         }
@@ -30,27 +30,27 @@ func init() {
                 m := TorrentStart{
                     Url:  model.Url,
                     Name: model.Name}
-                Event.Emit(&m)
+                Event.Emit(&m, context)
                 return
             }
         }
     })
 
-    Event.Listen(func(model *Imdb) {
+    Event.Listen(func(model *Imdb, context *Context) {
         if model.Type != "TV" {
             return
         }
         r := Show{Name: model.Name}
-        Event.Emit(&r)
+        Event.Emit(&r, context)
     })
 
-    Pipe.Global("follow show (.+)", func(l *Context, args []string) {
+    Pipe.Global("follow show (.+)", func(context *Context, args []string) {
         r, _ := reference.Omdb.Search(args[1], "series")
         if r["Response"].(string) != "True" {
             return
         }
         m := Show{r["Title"].(string)}
-        Event.Emit(&m)
+        Event.Emit(&m, context)
     })
 
 }

@@ -35,24 +35,24 @@ func (e *event) Listen(cb interface{}) {
     Database.Register(kind)
 }
 
-func (e *event) Emit(m interface{}) {
+func (e *event) Emit(m interface{}, c *Context) {
     v := reflect.ValueOf(m)
-    e.emitValue(v)
+    e.emitValue(v, c)
 }
 
-func (e *event) Error(msg string) {
+func (e *event) Error(msg string, c *Context) {
     err := new(Error)
     err.Message = msg
-    e.Emit(err)
+    e.Emit(err, c)
 }
 
-func (e *event) Message(msg string) {
+func (e *event) Message(msg string, c *Context) {
     m := new(Message)
     m.Message = msg
-    e.Emit(m)
+    e.Emit(m, c)
 }
 
-func (e *event) EmitJson(kind string, data []byte) {
+func (e *event) EmitJson(kind string, data []byte, c *Context) {
     t := e.reflect[kind]
     if t == nil {
         log.Println("No model", kind)
@@ -61,17 +61,18 @@ func (e *event) EmitJson(kind string, data []byte) {
     v := reflect.New(t)
     i := v.Interface()
     json.Unmarshal(data, i)
-    e.emitValue(v)
+    e.emitValue(v, c)
 }
 
-func (e *event) emitValue(v reflect.Value) {
+func (e *event) emitValue(v reflect.Value, context *Context) {
     kind := v.Type().Elem()
+    contextValue := reflect.ValueOf(context)
     Database.Put(v.Interface())
 
     for _, key := range e.reflect {
         if kind.AssignableTo(key) || (key.Kind() == reflect.Interface && v.Type().Implements(key)) {
             for _, cb := range e.cache[key.Name()] {
-                go cb.Call([]reflect.Value{v})
+                go cb.Call([]reflect.Value{v, contextValue})
             }
         }
     }

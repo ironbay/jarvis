@@ -16,7 +16,8 @@ func init() {
         if err != nil {
             return
         }
-        Event.EmitJson(kind, data)
+        context := new(Context)
+        Event.EmitJson(kind, data, context)
         fmt.Fprint(w, "ok")
     })
 

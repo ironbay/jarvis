@@ -8,6 +8,6 @@ type Browse struct {
 }
 
 func init() {
-    Event.Listen(func(model *Browse) {
+    Event.Listen(func(model *Browse, context *Context) {
     })
 }
