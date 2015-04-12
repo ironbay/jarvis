@@ -9,9 +9,15 @@ import (
     "math/rand"
     "os"
     "reflect"
+    "time"
 )
 
 type database struct {
+}
+
+type temporal struct {
+    model
+    Created time.Time
 }
 
 type Keyable interface {
@@ -24,11 +30,12 @@ func init() {
 }
 
 func (d *database) Put(m interface{}) {
+    var output = temporal{m, time.Now()}
     key := fmt.Sprint(rand.Float64())
     if k, ok := m.(Keyable); ok {
         key = k.Key()
     }
-    data, _ := json.Marshal(m)
+    data, _ := json.Marshal(output)
     err := ioutil.WriteFile(d.path(m)+key+".json", data, 0775)
     if err != nil {
         log.Println(err)

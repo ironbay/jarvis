@@ -26,7 +26,7 @@ func init() {
         Database.Get(&shows)
         lower := strings.ToLower(model.Name)
         for _, m := range shows {
-            if strings.Contains(lower, strings.ToLower(m.Name)) {
+            if strings.Index(lower, strings.ToLower(m.Name)) == 0 {
                 m := TorrentStart{
                     Url:  model.Url,
                     Name: model.Name}

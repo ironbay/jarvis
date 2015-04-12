@@ -7,6 +7,7 @@ import (
 )
 
 type TorrentUpload struct {
+    Id       string
     Name     string
     Url      string
     Category string
@@ -34,7 +35,8 @@ func init() {
         model := new(TorrentUpload)
         model.Name = name.FindStringSubmatch(text)[1]
         model.Category = category.FindStringSubmatch(text)[1]
-        model.Url = "http://www.torrentleech.org/rss/download/" + id.FindStringSubmatch(text)[1] + "/" + Torrentleech.Key + "/download"
+        model.Id = id.FindStringSubmatch(text)[1]
+        model.Url = "http://www.torrentleech.org/rss/download/" + model.Id + "/" + Torrentleech.Key + "/download"
         Event.Emit(model, NoContext())
     })
 
