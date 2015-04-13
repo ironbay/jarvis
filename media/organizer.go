@@ -1,6 +1,7 @@
-package cortex
+package media
 
 import (
+    "github.com/ironbay/jarvis/cortex"
     "io/ioutil"
     "os"
     "regexp"
@@ -28,7 +29,7 @@ func init() {
     tv := "/media/tv/"
     movie := "/media/movies/"
 
-    var clean = func(context *Context) {
+    var clean = func(context *cortex.Context) {
         for _, p := range []string{tv, movie} {
             r, _ := ioutil.ReadDir(p)
             now := time.Now()
@@ -38,36 +39,36 @@ func init() {
                         Path: p + "/" + f.Name(),
                         Name: f.Name()}
                     os.Remove(m.Path)
-                    Event.Emit(&m, context)
+                    cortex.Event.Emit(&m, context)
                 }
             }
         }
     }
 
-    Cron.AddFunc("@daily", func() {
-        clean(NoContext())
+    cortex.Cron.AddFunc("@daily", func() {
+        clean(cortex.NoContext())
     })
 
-    var classify = func(context *Context) {
+    var classify = func(context *cortex.Context) {
         r, _ := ioutil.ReadDir(root)
         for _, p := range r {
-            Event.Emit(&FileDownload{
+            cortex.Event.Emit(&FileDownload{
                 Path: root + p.Name(),
                 Name: p.Name()}, context)
         }
     }
 
-    Event.Listen(func(m *TorrentFinished, context *Context) {
+    cortex.Event.Listen(func(m *TorrentFinished, context *cortex.Context) {
         if ok, _ := regexp.MatchString("(avi|mp4|mkv)$", m.Path); ok {
             info, err := os.Stat(m.Path)
             if err != nil {
-                Event.Error(err.Error(), context)
+                cortex.Event.Error(err.Error(), context)
                 return
             }
             data, _ := ioutil.ReadFile(m.Path)
             ioutil.WriteFile(root+info.Name(), data, 0755)
         } else {
-            Process.Run("unrar -r e " + m.Path + "/*.rar " + root)
+            cortex.Process.Run("unrar -r e " + m.Path + "/*.rar " + root)
             r, _ := ioutil.ReadDir(m.Path)
             for _, p := range r {
                 ok, _ := regexp.MatchString("(avi|mp4|mkv)$", p.Name())
@@ -86,7 +87,7 @@ func init() {
         regexp.MustCompile("(.+)\\Ws\\d"),
         regexp.MustCompile("(.+)\\W\\d")}
 
-    Event.Listen(func(m *FileDownload, context *Context) {
+    cortex.Event.Listen(func(m *FileDownload, context *cortex.Context) {
         output := movie
         lower := strings.ToLower(m.Name)
         if strings.Contains(lower, "sample") {
@@ -109,5 +110,5 @@ func init() {
         os.Chtimes(output, time.Now(), time.Now())
     })
 
-    classify(NoContext())
+    classify(cortex.NoContext())
 }

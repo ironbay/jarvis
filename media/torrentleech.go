@@ -1,8 +1,9 @@
-package cortex
+package media
 
 import (
     "fmt"
     "github.com/PuerkitoBio/goquery"
+    "github.com/ironbay/jarvis/cortex"
     "log"
     "net/http"
     "strconv"
@@ -20,7 +21,7 @@ var Torrentleech = func() *torrentleech {
     m := torrentleech{
         Key: "c7afa073572a4ee09f8c"}
 
-    Pipe.Global("download (.+)", func(ctx *Context, args []string) {
+    cortex.Pipe.Global("download (.+)", func(ctx *cortex.Context, args []string) {
         matches := m.Search(args[1])
         if len(matches) == 0 {
             ctx.Send("No matches found")
@@ -42,13 +43,13 @@ var Torrentleech = func() *torrentleech {
             }
             m := new(TorrentStart)
             m.Url = matches[index].Url
-            Event.Emit(m, ctx)
+            cortex.Event.Emit(m, ctx)
             ctx.Send("Downloading " + matches[index].Name)
             return
         }
         m := new(TorrentStart)
         m.Url = matches[0].Url
-        Event.Emit(m, ctx)
+        cortex.Event.Emit(m, ctx)
         ctx.Send("Downloading " + matches[0].Name)
     })
 

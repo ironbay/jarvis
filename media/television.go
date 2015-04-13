@@ -1,6 +1,7 @@
-package cortex
+package media
 
 import (
+    "github.com/ironbay/jarvis/cortex"
     "github.com/ironbay/jarvis/cortex/reference"
     "strings"
 )
@@ -18,39 +19,39 @@ func (s *Show) Alert() string {
 }
 
 func init() {
-    Event.Listen(func(model *TorrentUpload, context *Context) {
+    cortex.Event.Listen(func(model *TorrentUpload, context *cortex.Context) {
         if model.Category != "TV :: Episodes" {
             return
         }
         shows := make([]Show, 0)
-        Database.Get(&shows)
+        cortex.Database.Get(&shows)
         lower := strings.ToLower(model.Name)
         for _, m := range shows {
             if strings.Index(lower, strings.ToLower(m.Name)) == 0 {
                 m := TorrentStart{
                     Url:  model.Url,
                     Name: model.Name}
-                Event.Emit(&m, context)
+                cortex.Event.Emit(&m, context)
                 return
             }
         }
     })
 
-    Event.Listen(func(model *Imdb, context *Context) {
+    cortex.Event.Listen(func(model *Imdb, context *cortex.Context) {
         if model.Type != "TV" {
             return
         }
         r := Show{Name: model.Name}
-        Event.Emit(&r, context)
+        cortex.Event.Emit(&r, context)
     })
 
-    Pipe.Global("follow show (.+)", func(context *Context, args []string) {
+    cortex.Pipe.Global("follow show (.+)", func(context *cortex.Context, args []string) {
         r, _ := reference.Omdb.Search(args[1], "series")
         if r["Response"].(string) != "True" {
             return
         }
         m := Show{r["Title"].(string)}
-        Event.Emit(&m, context)
+        cortex.Event.Emit(&m, context)
     })
 
 }

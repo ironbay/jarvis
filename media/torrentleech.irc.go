@@ -1,7 +1,8 @@
-package cortex
+package media
 
 import (
     irc "github.com/fluffle/goirc/client"
+    "github.com/ironbay/jarvis/cortex"
     "regexp"
 )
 
@@ -25,7 +26,7 @@ func init() {
     c := irc.Client(cfg)
 
     c.HandleFunc("connected", func(conn *irc.Conn, line *irc.Line) {
-        Event.Message("Connected to Torrentleech", NoContext())
+        cortex.Event.Message("Connected to Torrentleech", cortex.NoContext())
         conn.Join("#tlannounces")
     })
 
@@ -36,11 +37,11 @@ func init() {
         model.Category = category.FindStringSubmatch(text)[1]
         model.Id = id.FindStringSubmatch(text)[1]
         model.Url = "http://www.torrentleech.org/rss/download/" + model.Id + "/" + Torrentleech.Key + "/download"
-        Event.Emit(model, NoContext())
+        cortex.Event.Emit(model, cortex.NoContext())
     })
 
     c.HandleFunc("disconnected", func(conn *irc.Conn, line *irc.Line) {
-        Event.Error("Reconnecting to Torrentleech...", NoContext())
+        cortex.Event.Error("Reconnecting to Torrentleech...", cortex.NoContext())
         c.Connect()
     })
 

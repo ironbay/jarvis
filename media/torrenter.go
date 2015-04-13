@@ -1,6 +1,7 @@
-package cortex
+package media
 
 import (
+    "github.com/ironbay/jarvis/cortex"
     "io"
     "net/http"
     "os"
@@ -20,20 +21,16 @@ func init() {
 
     downloaded := "/media/torrents/downloaded/"
 
-    Event.Listen(func(model *TorrentStart, context *Context) {
-        path := downloaded + hash(model.Url) + ".torrent"
+    cortex.Event.Listen(func(model *TorrentStart, context *cortex.Context) {
+        path := downloaded + cortex.Hash(model.Url) + ".torrent"
         out, _ := os.Create(path)
         defer out.Close()
         resp, _ := http.Get(model.Url)
         defer resp.Body.Close()
         io.Copy(out, resp.Body)
-
-        m := ProcessStart{
-            Command: "deluge-console add " + path}
-        Event.Emit(&m, context)
     })
 
-    Event.Listen(func(model *TorrentFinished, context *Context) {
+    cortex.Event.Listen(func(model *TorrentFinished, context *cortex.Context) {
 
     })
 }

@@ -1,7 +1,8 @@
-package cortex
+package media
 
 import (
     "github.com/PuerkitoBio/goquery"
+    "github.com/ironbay/jarvis/cortex"
     "strings"
 )
 
@@ -11,7 +12,7 @@ type Imdb struct {
 }
 
 func init() {
-    Event.Listen(func(m *Browse, context *Context) {
+    cortex.Event.Listen(func(m *cortex.Browse, context *cortex.Context) {
         if !strings.Contains(m.Url, "imdb.com") {
             return
         }
@@ -27,7 +28,7 @@ func init() {
         if r.Name == "" {
             return
         }
-        Event.Emit(r, context)
+        cortex.Event.Emit(r, context)
 
     })
 }
