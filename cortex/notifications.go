@@ -4,6 +4,7 @@ type Alert interface {
     Alert() string
 }
 type Error struct {
+    Model
     Message string
 }
 
@@ -12,6 +13,7 @@ func (e *Error) Alert() string {
 }
 
 type Message struct {
+    Model
     Message string
 }
 

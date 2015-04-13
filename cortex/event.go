@@ -4,6 +4,7 @@ import (
     "encoding/json"
     "log"
     "reflect"
+    "time"
 )
 
 type event struct {
@@ -11,7 +12,8 @@ type event struct {
     reflect map[string]reflect.Type
 }
 
-type model interface {
+type Model struct {
+    Created time.Time
 }
 
 var Event = func() *event {
@@ -35,9 +37,9 @@ func (e *event) Listen(cb interface{}) {
     Database.Register(kind)
 }
 
-func (e *event) Emit(m interface{}, c *Context) {
-    v := reflect.ValueOf(m)
-    e.emitValue(v, c)
+func (e *event) Emit(model interface{}, ctx *Context) {
+    value := reflect.ValueOf(model)
+    e.emitValue(value, ctx)
 }
 
 func (e *event) Error(msg string, c *Context) {

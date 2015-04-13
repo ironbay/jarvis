@@ -2,7 +2,6 @@ package cortex
 
 import (
     irc "github.com/fluffle/goirc/client"
-    "log"
     "regexp"
 )
 
@@ -42,10 +41,9 @@ func init() {
 
     c.HandleFunc("disconnected", func(conn *irc.Conn, line *irc.Line) {
         Event.Error("Reconnecting to Torrentleech...", NoContext())
+        c.Connect()
     })
 
-    if err := c.Connect(); err != nil {
-        log.Printf("Connection error: %s\n", err)
-    }
+    c.Connect()
 
 }
