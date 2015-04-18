@@ -28,9 +28,9 @@ func (ctx *Context) Listen(exp string) []string {
         Channel: make(chan []string, 0)}
     arr := Pipe.contextual[ctx.User]
     if arr == nil {
-        arr = make([]*command, 0)
+        Pipe.contextual[ctx.User] = make(map[string]*command, 0)
     }
-    Pipe.contextual[ctx.User] = append(arr, &cmd)
+    Pipe.contextual[ctx.User][cmd.Regex.String()] = &cmd
     return <-cmd.Channel
 }
 
@@ -42,7 +42,7 @@ type Input struct {
 
 type pipe struct {
     global     []*command
-    contextual map[string][]*command
+    contextual map[string]map[string]*command
 }
 
 type command struct {
@@ -81,7 +81,7 @@ var Pipe = func() *pipe {
 
     r := new(pipe)
     r.global = make([]*command, 0)
-    r.contextual = make(map[string][]*command, 0)
+    r.contextual = make(map[string]map[string]*command, 0)
     Event.Listen(func(m *Input, context *Context) {
         r.Handle(m.Text, context)
     })
@@ -105,10 +105,10 @@ func (p *pipe) Handle(input string, context *Context) {
     if contextual == nil {
         return
     }
-    invalid := make([]*command, 0)
+    invalid := make(map[string]*command, 0)
     for _, cmd := range contextual {
         if !cmd.Handle(context, input) {
-            invalid = append(invalid, cmd)
+            invalid[cmd.Regex.String()] = cmd
         }
     }
     p.contextual[context.User] = invalid
