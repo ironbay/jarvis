@@ -30,7 +30,7 @@ var Hangouts = func() *hangouts {
 
     cfg := irc.NewConfig("jarvis")
     cfg.SSL = false
-    cfg.Server = "jarvis.systems:6668"
+    cfg.Server = "67.219.144.34:6668"
     cfg.NewNick = func(n string) string { return n + "^" }
     c := irc.Client(cfg)
     r.Client = c
