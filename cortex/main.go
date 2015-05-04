@@ -4,6 +4,7 @@ import (
     "crypto/md5"
     "encoding/hex"
     "log"
+    "os"
 )
 
 func Run() {
@@ -12,6 +13,13 @@ func Run() {
         c.Send("Hello " + c.User)
         c.Listen("how are you")
         c.Send("I'm doing fantastic " + c.User)
+    })
+
+    Pipe.Global("where are you", func(c *Context, matches []string) {
+
+        host, _ := os.Hostname()
+        c.Send("I am at " + host)
+
     })
 
 }
