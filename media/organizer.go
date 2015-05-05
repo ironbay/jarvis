@@ -107,7 +107,6 @@ func init() {
         output += m.Name
         os.Rename(m.Path, output)
         os.Chtimes(output, time.Now(), time.Now())
-        shu
     })
 
     classify(cortex.NoContext())
