@@ -5,6 +5,7 @@ import (
     "github.com/termie/go-shutil"
     "io/ioutil"
     "os"
+    "path/filepath"
     "regexp"
     "strings"
     "time"
@@ -60,24 +61,32 @@ func init() {
     }
 
     cortex.Event.Listen(func(m *TorrentFinished, context *cortex.Context) {
-        if ok, _ := regexp.MatchString("(avi|mp4|mkv)$", m.Path); ok {
-            info, err := os.Stat(m.Path)
-            if err != nil {
-                cortex.Event.Error(err.Error(), context)
-                return
-            }
-            shutil.CopyFile(m.Path, root+info.Name(), false)
-        } else {
-            cortex.Process.Run("unrar -r e " + m.Path + "/*.rar " + root)
-            r, _ := ioutil.ReadDir(m.Path)
-            for _, p := range r {
-                ok, _ := regexp.MatchString("(avi|mp4|mkv)$", p.Name())
-                if !ok {
-                    continue
-                }
-                shutil.CopyFile(m.Path+"/"+p.Name(), root+p.Name(), false)
-            }
+        files := []string{}
+        info, err := os.Stat(m.Path)
+        if err != nil {
+            cortex.Event.Error(err.Error(), context)
+            return
         }
+        if info.IsDir() {
+            cortex.Process.Run("unrar -r e " + m.Path + "/*.rar " + root)
+            filepath.Walk(m.Path, func(path string, f os.FileInfo, err error) error {
+                files = append(files, path)
+                return nil
+            })
+        } else {
+            files = append(files, m.Path)
+        }
+
+        for _, file := range files {
+            if ok, _ := regexp.MatchString("(avi|mp4|mkv)$", file); !ok {
+                continue
+            }
+            if strings.Contains(file, "sample") {
+                continue
+            }
+            shutil.Copy(file, root, false)
+        }
+
         classify(context)
     })
 
