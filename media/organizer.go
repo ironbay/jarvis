@@ -2,6 +2,7 @@ package media
 
 import (
     "github.com/ironbay/jarvis/cortex"
+    "github.com/termie/go-shutil"
     "io/ioutil"
     "os"
     "regexp"
@@ -65,8 +66,7 @@ func init() {
                 cortex.Event.Error(err.Error(), context)
                 return
             }
-            data, _ := ioutil.ReadFile(m.Path)
-            ioutil.WriteFile(root+info.Name(), data, 0755)
+            shutil.CopyFile(m.Path, root+info.Name(), false)
         } else {
             cortex.Process.Run("unrar -r e " + m.Path + "/*.rar " + root)
             r, _ := ioutil.ReadDir(m.Path)
@@ -75,8 +75,7 @@ func init() {
                 if !ok {
                     continue
                 }
-                data, _ := ioutil.ReadFile(m.Path + "/" + p.Name())
-                ioutil.WriteFile(root+p.Name(), data, 0755)
+                shutil.CopyFile(m.Path+"/"+p.Name(), root+p.Name(), false)
             }
         }
         classify(context)
@@ -108,6 +107,7 @@ func init() {
         output += m.Name
         os.Rename(m.Path, output)
         os.Chtimes(output, time.Now(), time.Now())
+        shu
     })
 
     classify(cortex.NoContext())
