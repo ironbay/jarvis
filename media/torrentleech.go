@@ -85,6 +85,5 @@ func (t *torrentleech) raw(url string) []*TorrentUpload {
 }
 
 func (t *torrentleech) Search(query string) []*TorrentUpload {
-    return t.raw("http://www.torrentleech.org/torrents/browse/index/query/" + query + "/categories/10%2C11%2C13%2C14%2C2%2C26%2C27/orderby/seeders/order/desc")
-
+    return t.raw("http://www.torrentleech.org/torrents/browse/index/query/-pack%20-collection%20" + query + "/categories/10%2C11%2C13%2C14%2C2%2C26%2C27/orderby/seeders/order/desc")
 }
