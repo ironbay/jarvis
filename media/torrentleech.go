@@ -59,7 +59,7 @@ var Torrentleech = func() *torrentleech {
 func (t *torrentleech) raw(url string) []*TorrentUpload {
     client := http.Client{}
     req, _ := http.NewRequest("GET", url, nil)
-    req.Header.Add("Cookie", "member_id=53563; tluid=522483; tlpass=37fa4364bc5e903f4e5664caf3820e988f41e4e3; pass_hash=ef5be2fa3121fe9947bbbf247bddbc99; session_id=a8a4a2538b8a70a3ade7420cfeb0bfc9;")
+    req.Header.Add("Cookie", "member_id=53563; tluid=522483; tlpass=05c548a8a0eee54685374e912c28f518a2926b22; pass_hash=ef5be2fa3121fe9947bbbf247bddbc99; session_id=a8a4a2538b8a70a3ade7420cfeb0bfc9;")
     res, _ := client.Do(req)
     doc, _ := goquery.NewDocumentFromResponse(res)
 
