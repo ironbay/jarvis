@@ -25,7 +25,7 @@ func Run() {
 
     Pipe.Global("run (.+)", func(c *Context, matches []string) {
         out, _ := exec.Command("bash", "-c", matches[1]).Output()
-        c.Send(out)
+        c.Send(string(out))
     })
 
 }
