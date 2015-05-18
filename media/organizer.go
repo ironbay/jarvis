@@ -1,14 +1,15 @@
 package media
 
 import (
-    "github.com/ironbay/jarvis/cortex"
-    "github.com/termie/go-shutil"
     "io/ioutil"
     "os"
     "path/filepath"
     "regexp"
     "strings"
     "time"
+
+    "github.com/ironbay/jarvis/cortex"
+    "github.com/termie/go-shutil"
 )
 
 type FileDownload struct {
@@ -116,6 +117,8 @@ func init() {
         output += m.Name
         os.Rename(m.Path, output)
         os.Chtimes(output, time.Now(), time.Now())
+        Plex.Refresh(1)
+        Plex.Refresh(2)
     })
 
     classify(cortex.NoContext())
