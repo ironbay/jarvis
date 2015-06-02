@@ -37,7 +37,8 @@ func init() {
         text := line.Text()
         model := new(TorrentUpload)
         model.Name = name.FindStringSubmatch(text)[1]
-        if ignore.Match(strings.ToLower(model.Name)) {
+        lower := string(strings.ToLower(model.Name))
+        if ignore.Match(lower) {
             return
         }
         model.Category = category.FindStringSubmatch(text)[1]
