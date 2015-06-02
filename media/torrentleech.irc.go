@@ -2,7 +2,6 @@ package media
 
 import (
     "regexp"
-    "strings"
 
     irc "github.com/fluffle/goirc/client"
     "github.com/ironbay/jarvis/cortex"
@@ -19,7 +18,7 @@ type TorrentUpload struct {
 func init() {
     name := regexp.MustCompile("Name:'([^']+)")
     category := regexp.MustCompile("<([^>]+)")
-    ignore := regexp.MustCompile("internal|spanish|hebsub")
+    ignore := regexp.MustCompile("(?i)internal|spanish|hebsub")
     id := regexp.MustCompile("torrent/(\\d+)")
 
     cfg := irc.NewConfig("jarvis")
@@ -37,8 +36,7 @@ func init() {
         text := line.Text()
         model := new(TorrentUpload)
         model.Name = name.FindStringSubmatch(text)[1]
-        lower := string(strings.ToLower([]byte(model.Name)))
-        if ignore.Match(lower) {
+        if ignore.Match([]byte(model.Name)) {
             return
         }
         model.Category = category.FindStringSubmatch(text)[1]
