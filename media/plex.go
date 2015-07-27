@@ -14,7 +14,7 @@ var Plex = func() *plexSession {
         Root: "http://ironbay.digital:32400",
         Before: func(r *http.Request, c *http.Client) {
             values := r.URL.Query()
-            values.Add("X-Plex-Token", "AiR9fy9zduRJYhj1RrFd")
+            values.Add("X-Plex-Token", "TMpiwqiqL2q41RxqgU8r")
             r.URL.RawQuery = values.Encode()
         }}
     result := new(plexSession)
