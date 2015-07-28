@@ -6,7 +6,7 @@ import (
 )
 
 type plexSession struct {
-    Refresh func(id int) (map[string]interface{}, error) `GET:/library/sections/{0}/refresh`
+    Refresh func(id int) (map[string]interface{}, error) `method:"GET" path:"/library/sections/{0}/refresh"`
 }
 
 var Plex = func() *plexSession {
