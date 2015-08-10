@@ -44,7 +44,7 @@ func init() {
 		model.Id = id.FindStringSubmatch(text)[1]
 		model.Url = "http://www.torrentleech.org/rss/download/" + model.Id + "/" + Torrentleech.Key + "/download"
 		go func() {
-			time.Sleep(30 * time.Second)
+			time.Sleep(45 * time.Second)
 			cortex.Event.Emit(model, cortex.NoContext())
 		}()
 	})
