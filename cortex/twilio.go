@@ -2,6 +2,7 @@ package cortex
 
 import (
 	"log"
+	"os"
 
 	"github.com/sfreiberg/gotwilio"
 )
@@ -12,8 +13,8 @@ type twilioSession struct {
 }
 
 var Twilio = func() *twilioSession {
-	accountSid := "AC7f285962f71e4e488f683e6404d52d28"
-	authToken := "71d1c509fcb4c704dd6e2fd99a873854"
+	accountSid := os.Getenv("TWILIO_SID")
+	authToken := os.Getenv("TWILIO_AUTH")
 	result := twilioSession{
 		twilio: gotwilio.NewTwilioClient(accountSid, authToken),
 		from:   "9494272522",
