@@ -20,7 +20,7 @@ func (s *Show) Alert() string {
 
 func init() {
 	cortex.Event.Listen(func(model *TorrentUpload, context *cortex.Context) {
-		if !strings.Contains(model.Category, "TV") {
+		if !strings.Contains(model.Category, "TV :: Episodes") {
 			return
 		}
 		shows := make([]Show, 0)
