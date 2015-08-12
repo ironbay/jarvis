@@ -36,6 +36,7 @@ var Hangouts = func() *hangouts {
     r.Client = c
 
     c.HandleFunc("connected", func(conn *irc.Conn, line *irc.Line) {
+        conn.Join("#Computers[5a94646]")
         conn.Join("#Jarvis[37b58e0]")
         conn.Join("#Broo[a302fda]")
         Event.Message("Initialized", NoContext())
