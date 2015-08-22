@@ -10,7 +10,7 @@ func socketConnect(ws *websocket.Conn) {
 	query := ws.Request().URL.Query()
 	connection := Connection{
 		Conn:         ws,
-		Subscription: Subscribe(query.Get("pattern"), false),
+		Subscription: Subscribe(query.Get("pattern"), true),
 	}
 	connection.listen()
 }
@@ -23,6 +23,13 @@ func startServer() {
 			Handler: websocket.Handler(socketConnect),
 		}
 		ws.ServeHTTP(ctx.Writer, ctx.Request)
+	})
+
+	r.GET("/once", func(ctx *gin.Context) {
+		pattern := ctx.Request.URL.Query().Get("pattern")
+		subscription := Subscribe(pattern, true)
+		event := <-subscription.Channel
+		ctx.JSON(200, event)
 	})
 
 	r.POST("/emit/model", func(ctx *gin.Context) {
