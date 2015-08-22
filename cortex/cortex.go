@@ -1,6 +1,6 @@
 package cortex
 
 func Run() {
-	registerRegexModel(&RegexModel{"debug.echo", "echo (.+)", nil})
+	registerRegexModel(&RegexModel{"debug.echo", "echo (?P<message>.+)", nil})
 	startServer()
 }

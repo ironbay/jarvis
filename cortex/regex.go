@@ -22,6 +22,9 @@ func (this *RegexModel) Match(input string) (Model, bool) {
 		return nil, false
 	}
 	for i, name := range this.compiled.SubexpNames() {
+		if name == "" {
+			continue
+		}
 		result[name] = match[i]
 	}
 	return result, true
