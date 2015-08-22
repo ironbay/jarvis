@@ -17,13 +17,13 @@ func (this *Connection) listen() {
 		for {
 			buf := ""
 			if err := websocket.Message.Receive(this.Conn, &buf); err != nil {
+				log.Println(err)
 				break
 			}
 		}
 	}()
 	for event := range this.Subscription.Channel {
 		bytes, _ := json.Marshal(event)
-		log.Println(string(bytes))
-		websocket.Message.Send(this.Conn, bytes)
+		this.Conn.Write(bytes)
 	}
 }

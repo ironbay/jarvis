@@ -44,11 +44,20 @@ func (this *Subscription) Close() {
 }
 
 func Emit(event *Event) {
-	log.Println("Emitting", event)
+	log.Println("Emitting", event.Type)
 	for key := range subscriptions {
 		subscription := subscriptions[key]
 		if subscription.Match(event.Type) {
 			subscription.Push(event)
 		}
 	}
+	stringable, ok := stringables[event.Type]
+	if !ok {
+		return
+	}
+	Emit(&Event{
+		Context: event.Context,
+		Type:    "conversation.stringable",
+		Model:   Model{"message": stringable.Render(event.Model)},
+	})
 }

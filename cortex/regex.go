@@ -6,8 +6,8 @@ import (
 )
 
 type RegexModel struct {
-	Type     string
-	Regex    string
+	Type     string `json:"type"`
+	Regex    string `json:"regex"`
 	compiled *regexp.Regexp
 }
 
@@ -30,29 +30,13 @@ func (this *RegexModel) Match(input string) (Model, bool) {
 	return result, true
 }
 
-var regexModels = make([]*RegexModel, 0)
+var regexModels = make(map[string]*RegexModel, 0)
 
 func registerRegexModel(model *RegexModel) {
 	model.compile()
 	log.Println("Registered", model.Type, model.Regex)
-	regexModels = append(regexModels, model)
+	regexModels[model.Type+"-"+model.Regex] = model
 }
 
 func init() {
-	subscription := Subscribe("conversation.message", false)
-	go func() {
-		for event := range subscription.Channel {
-			for _, regex := range regexModels {
-				model, ok := regex.Match(event.Model["message"].(string))
-				if !ok {
-					continue
-				}
-				Emit(&Event{
-					Type:    regex.Type,
-					Context: event.Context,
-					Model:   model,
-				})
-			}
-		}
-	}()
 }
