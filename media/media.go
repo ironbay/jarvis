@@ -1,5 +1,0 @@
-package media
-
-func Run() {
-
-}

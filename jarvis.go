@@ -1,21 +1,21 @@
 package main
 
 import (
+	"os"
+
 	"github.com/ironbay/jarvis/cortex"
-	"github.com/ironbay/jarvis/media"
-	"time"
 )
 
 func main() {
-	go forever()
-	cortex.Run()
-	media.Run()
+	args := os.Args
+	if len(args) == 1 {
+		return
+	}
+
+	switch args[1] {
+	case "cortex":
+		go cortex.Run()
+	}
 
 	select {}
-}
-
-func forever() {
-	for {
-		time.Sleep(time.Second)
-	}
 }
