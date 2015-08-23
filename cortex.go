@@ -1,6 +1,6 @@
-package main
+package jarvis
 
-func main() {
+func Run() {
 	subscription := Subscribe("conversation.message", false)
 	go func() {
 		for event := range subscription.Channel {

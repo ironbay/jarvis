@@ -1,9 +1,8 @@
 FROM golang
 WORKDIR /go/src/github.com/ironbay/jarvis
 ADD . .
-RUN go get -t -d -v
-RUN go build -v
+RUN cd jarvis && go get -t -d -v && go install -v
 
-CMD ./jarvis
+CMD jarvis
 VOLUME /var/lib/jarvis
 EXPOSE 3001

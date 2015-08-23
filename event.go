@@ -1,4 +1,4 @@
-package main
+package jarvis
 
 type Event struct {
 	Model   Model   `json:"model"`
