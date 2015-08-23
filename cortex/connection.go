@@ -2,7 +2,6 @@ package cortex
 
 import (
 	"encoding/json"
-	"log"
 
 	"golang.org/x/net/websocket"
 )
@@ -17,7 +16,6 @@ func (this *Connection) listen() {
 		for {
 			buf := ""
 			if err := websocket.Message.Receive(this.Conn, &buf); err != nil {
-				log.Println(err)
 				break
 			}
 		}

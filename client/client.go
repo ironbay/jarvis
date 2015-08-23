@@ -60,7 +60,7 @@ func (this *Client) Forever(pattern string) (chan *cortex.Event, error) {
 func (this *Client) RegisterRegex(modelType string, regex string) {
 	this.EmitModel(cortex.Event{
 		Type:    "register.regex",
-		Context: cortex.Context{"type": this.Context},
+		Context: this.GetContext(),
 		Model:   cortex.Model{"type": modelType, "regex": regex},
 	})
 }

@@ -3,8 +3,6 @@ package cortex
 import (
 	"log"
 	"regexp"
-
-	"github.com/twinj/uuid"
 )
 
 type Subscription struct {
@@ -19,7 +17,7 @@ var subscriptions = make(map[string]*Subscription, 0)
 func Subscribe(modelType string, once bool) *Subscription {
 	log.Println("New Subscriber For", modelType)
 	result := Subscription{
-		ID:      uuid.Formatter(uuid.NewV4(), uuid.CleanHyphen),
+		ID:      ID(),
 		Type:    modelType,
 		Once:    once,
 		Channel: make(chan *Event),
@@ -49,6 +47,7 @@ func (this *Subscription) Close() {
 }
 
 func Emit(event *Event) {
+	save(event)
 	log.Println("Emitting", event.Type)
 	for key := range subscriptions {
 		subscription := subscriptions[key]
