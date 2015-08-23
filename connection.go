@@ -16,6 +16,7 @@ func (this *Connection) listen() {
 		for {
 			buf := ""
 			if err := websocket.Message.Receive(this.Conn, &buf); err != nil {
+				this.Subscription.Close()
 				break
 			}
 		}

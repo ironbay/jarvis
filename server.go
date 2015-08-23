@@ -10,7 +10,7 @@ func forever(ws *websocket.Conn) {
 	query := ws.Request().URL.Query()
 	connection := Connection{
 		Conn:         ws,
-		Subscription: Subscribe(query.Get("pattern"), false),
+		Subscription: Subscribe(query.Get("pattern"), false, query.Get("context")),
 	}
 	connection.listen()
 }
@@ -26,8 +26,9 @@ func startServer() {
 	})
 
 	r.GET("/subscribe/once", func(ctx *gin.Context) {
-		pattern := ctx.Request.URL.Query().Get("pattern")
-		subscription := Subscribe(pattern, true)
+		query := ctx.Request.URL.Query()
+		pattern := query.Get("pattern")
+		subscription := Subscribe(pattern, true, query.Get("context"))
 		event := <-subscription.Channel
 		ctx.JSON(200, event)
 	})

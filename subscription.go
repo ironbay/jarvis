@@ -10,28 +10,47 @@ type Subscription struct {
 	Type    string
 	Once    bool
 	Channel chan *Event
+	Context Context
+	closed  bool
 }
 
 var subscriptions = make(map[string]*Subscription, 0)
 
-func Subscribe(modelType string, once bool) *Subscription {
-	log.Println("New Subscriber For", modelType)
+func Subscribe(modelType string, once bool, contextType string) *Subscription {
+	log.Println("New Subscriber For", modelType, contextType)
 	result := Subscription{
 		ID:      ID(),
 		Type:    modelType,
 		Once:    once,
 		Channel: make(chan *Event),
+		Context: make(Context),
+	}
+	if contextType != "" {
+		result.Context["type"] = contextType
 	}
 	subscriptions[result.ID] = &result
 	return &result
 }
 
-func (this *Subscription) Match(input string) bool {
+func (this *Subscription) MatchType(input string) bool {
 	if input == this.Type {
 		return true
 	}
 	ok, _ := regexp.MatchString(this.Type, input)
 	return ok
+}
+
+func (this *Subscription) MatchContext(context Context) bool {
+	if context["type"] == "broadcast" {
+		return true
+	}
+	for key, value := range this.Context {
+		compare := context[key]
+		if compare != value {
+			return false
+		}
+	}
+	return true
 }
 
 func (this *Subscription) Push(event *Event) {
@@ -42,8 +61,12 @@ func (this *Subscription) Push(event *Event) {
 }
 
 func (this *Subscription) Close() {
+	if this.closed {
+		return
+	}
 	close(this.Channel)
 	delete(subscriptions, this.ID)
+	this.closed = true
 }
 
 func Emit(event *Event) {
@@ -51,7 +74,7 @@ func Emit(event *Event) {
 	log.Println("Emitting", event.Type)
 	for key := range subscriptions {
 		subscription := subscriptions[key]
-		if subscription.Match(event.Type) {
+		if subscription.MatchType(event.Type) && subscription.MatchContext(event.Context) {
 			subscription.Push(event)
 		}
 	}

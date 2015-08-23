@@ -1,7 +1,7 @@
 package jarvis
 
 func Run() {
-	subscription := Subscribe("conversation.message", false)
+	subscription := Subscribe("conversation.message", false, "")
 	go func() {
 		for event := range subscription.Channel {
 			for _, regex := range regexModels {

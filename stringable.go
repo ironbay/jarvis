@@ -30,7 +30,7 @@ func (this *Stringable) Render(model map[string]interface{}) string {
 }
 
 func listenStringableRegistration() {
-	for event := range Subscribe("register.stringable", false).Channel {
+	for event := range Subscribe("register.stringable", false, "").Channel {
 		stringable := new(Stringable)
 		mapstructure.Decode(event.Model, stringable)
 		registerStringable(stringable)

@@ -47,7 +47,7 @@ func ID() string {
 }
 
 func listenSchemaRegistration() {
-	for event := range Subscribe("register.schema", false).Channel {
+	for event := range Subscribe("register.schema", false, "").Channel {
 		schema := new(Schema)
 		mapstructure.Decode(event.Model, schema)
 		registerSchema(schema)

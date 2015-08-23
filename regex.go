@@ -41,7 +41,7 @@ func registerRegex(model *RegexModel) {
 }
 
 func listenRegexRegistration() {
-	for event := range Subscribe("register.regex", false).Channel {
+	for event := range Subscribe("register.regex", false, "").Channel {
 		regex := new(RegexModel)
 		mapstructure.Decode(event.Model, regex)
 		registerRegex(regex)
