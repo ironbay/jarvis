@@ -1,6 +1,6 @@
 package main
 
-func Run() {
+func main() {
 	subscription := Subscribe("conversation.message", false)
 	go func() {
 		for event := range subscription.Channel {
