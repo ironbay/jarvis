@@ -31,7 +31,6 @@ func main() {
 			Context: jarvis.GetContext(),
 			Model:   cortex.Model{"message": input},
 		})
-
 	}
 }
 

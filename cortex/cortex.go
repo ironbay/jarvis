@@ -1,4 +1,4 @@
-package cortex
+package main
 
 func Run() {
 	subscription := Subscribe("conversation.message", false)

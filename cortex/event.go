@@ -1,4 +1,4 @@
-package cortex
+package main
 
 type Event struct {
 	Model   Model   `json:"model"`

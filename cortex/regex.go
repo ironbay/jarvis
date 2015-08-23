@@ -1,4 +1,4 @@
-package cortex
+package main
 
 import (
 	"log"
