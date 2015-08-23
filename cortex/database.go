@@ -46,7 +46,7 @@ func ID() string {
 	return uuid.Formatter(uuid.NewV4(), uuid.CleanHyphen)
 }
 
-func listenSchema() {
+func listenSchemaRegistration() {
 	for event := range Subscribe("register.schema", false).Channel {
 		schema := new(Schema)
 		mapstructure.Decode(event.Model, schema)
