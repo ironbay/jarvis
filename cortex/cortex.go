@@ -17,8 +17,11 @@ func Run() {
 			}
 		}
 	}()
-	registerRegexModel(&RegexModel{"debug.echo", "echo (?P<message>.+)", nil})
-	registerStringable(&Stringable{"debug.echo", "Respond: %message"})
+	registerRegex(&RegexModel{"debug.echo", "echo (?P<message>.+)", nil})
+	registerStringable(&Stringable{"debug.echo", "%message"})
+
+	go listenStringableRegistration()
+	go listenRegexRegistration()
 
 	startServer()
 }

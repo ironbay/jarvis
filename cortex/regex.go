@@ -3,6 +3,8 @@ package cortex
 import (
 	"log"
 	"regexp"
+
+	"github.com/mitchellh/mapstructure"
 )
 
 type RegexModel struct {
@@ -32,11 +34,16 @@ func (this *RegexModel) Match(input string) (Model, bool) {
 
 var regexModels = make(map[string]*RegexModel, 0)
 
-func registerRegexModel(model *RegexModel) {
+func registerRegex(model *RegexModel) {
 	model.compile()
 	log.Println("Registered", model.Type, model.Regex)
 	regexModels[model.Type+"-"+model.Regex] = model
 }
 
-func init() {
+func listenRegexRegistration() {
+	for event := range Subscribe("register.regex", false).Channel {
+		regex := new(RegexModel)
+		mapstructure.Decode(event.Model, regex)
+		registerRegex(regex)
+	}
 }

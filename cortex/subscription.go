@@ -2,6 +2,7 @@ package cortex
 
 import (
 	"log"
+	"regexp"
 
 	"github.com/twinj/uuid"
 )
@@ -28,7 +29,11 @@ func Subscribe(modelType string, once bool) *Subscription {
 }
 
 func (this *Subscription) Match(input string) bool {
-	return input == this.Type
+	if input == this.Type {
+		return true
+	}
+	ok, _ := regexp.MatchString(this.Type, input)
+	return ok
 }
 
 func (this *Subscription) Push(event *Event) {

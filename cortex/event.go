@@ -9,3 +9,8 @@ type Event struct {
 type Model map[string]interface{}
 
 type Context map[string]interface{}
+
+func (this Context) Set(key string, value string) Context {
+	this[key] = value
+	return this
+}

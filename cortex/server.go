@@ -46,7 +46,7 @@ func startServer() {
 	r.POST("/register/regex", func(ctx *gin.Context) {
 		regexModel := new(RegexModel)
 		ctx.Bind(regexModel)
-		registerRegexModel(regexModel)
+		registerRegex(regexModel)
 		ctx.JSON(200, true)
 	})
 
