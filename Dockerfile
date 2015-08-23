@@ -1,9 +1,7 @@
 FROM golang
-ADD . /go/src/github.com/ironbay/jarvis
-ADD unrar /usr/local/bin/
-RUN cd /go/src/github.com/ironbay/jarvis && go get && go install
-RUN apt-get update
-RUN apt-get install curl
+WORKDIR /go/src/github.com/ironbay/jarvis
+ADD . .
+RUN cd jarvis && go get -t -d -v && go install -v
 
 CMD jarvis
 VOLUME /var/lib/jarvis
