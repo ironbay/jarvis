@@ -35,6 +35,7 @@ func (this *RegexModel) Match(input string) (Model, bool) {
 var regexModels = make(map[string]*RegexModel, 0)
 
 func registerRegex(model *RegexModel) {
+	model.Regex = "(?i)" + model.Regex
 	model.compile()
 	log.Println("Registered", model.Type, model.Regex)
 	regexModels[model.Type+"-"+model.Regex] = model
