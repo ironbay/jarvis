@@ -5,7 +5,11 @@ func Run() {
 	go func() {
 		for event := range subscription.Channel {
 			for _, regex := range regexModels {
-				model, ok := regex.Match(event.Model["message"].(string))
+				input, ok := event.Model["message"]
+				if !ok {
+					continue
+				}
+				model, ok := regex.Match(input.(string))
 				if !ok {
 					continue
 				}
