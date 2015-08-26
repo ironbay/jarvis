@@ -1,7 +1,7 @@
 package jarvis
 
 func Run() {
-	subscription := Subscribe("conversation.message", false, "")
+	subscription := Subscribe("conversation.message", "")
 	go func() {
 		for event := range subscription.Channel {
 			for _, regex := range regexModels {
@@ -21,11 +21,11 @@ func Run() {
 			}
 		}
 	}()
-	registerRegex(&RegexModel{"debug.echo", "echo (?P<message>.+)", nil})
-	registerStringable(&Stringable{"debug.echo", "%message"})
-
 	go listenStringableRegistration()
 	go listenRegexRegistration()
+
+	registerRegex(&RegexModel{"debug.echo", "^echo (?P<message>.+)", nil})
+	registerStringable(&Stringable{"debug.echo", "%message"})
 
 	startServer()
 }
