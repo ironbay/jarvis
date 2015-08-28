@@ -59,5 +59,9 @@ func startServer() {
 		ctx.JSON(200, true)
 	})
 
+	r.GET("/regex", func(ctx *gin.Context) {
+		ctx.JSON(200, regexModels)
+	})
+
 	r.Run(":3001")
 }
