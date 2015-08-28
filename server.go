@@ -1,6 +1,9 @@
 package jarvis
 
 import (
+	"strconv"
+
+	"github.com/dancannon/gorethink"
 	"github.com/gin-gonic/gin"
 
 	"golang.org/x/net/websocket"
@@ -61,6 +64,18 @@ func startServer() {
 
 	r.GET("/regex", func(ctx *gin.Context) {
 		ctx.JSON(200, regexModels)
+	})
+
+	r.GET("/model/:type", func(ctx *gin.Context) {
+		t := ctx.Param("type")
+		page, err := strconv.Atoi(ctx.Request.URL.Query().Get("page"))
+		if err != nil {
+			page = 0
+		}
+		cur, _ := gorethink.Table("events").GetAllByIndex("type", t).Skip(page * 100).Limit(100).Run(Rethink)
+		var result []Model
+		cur.All(&result)
+		ctx.JSON(200, result)
 	})
 
 	r.Run(":3001")
