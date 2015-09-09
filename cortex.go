@@ -21,6 +21,8 @@ func Run() {
 			}
 		}
 	}()
+
+	go listenSchemaRegistration()
 	go listenStringableRegistration()
 	go listenRegexRegistration()
 

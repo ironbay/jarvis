@@ -10,11 +10,11 @@ import (
 )
 
 type Event struct {
+	ID      string  `json:"id" gorethink:"id,omitempty"`
 	Model   Model   `json:"model" gorethink:"model"`
 	Context Context `json:"context" gorethink:"context"`
 	Type    string  `json:"type" gorethink:"type"`
 	Created int64   `json:"created" gorethink:"created"`
-	ID      string  `json:"id" gorethink:"id,omitempty"`
 }
 
 type Model map[string]interface{}
@@ -27,10 +27,14 @@ func (this Context) Set(key string, value string) Context {
 }
 
 func Emit(event *Event) error {
+	event.Created = time.Now().Unix()
+	schema, ok := schemas[event.Type]
+	if ok {
+		event.ID = schema.Generate(event.Model)
+	}
 	pretty.Print(event)
 	fmt.Println("\n")
-	event.Created = time.Now().Unix()
-	err := gorethink.Table("events").Insert(event).Exec(Rethink)
+	err := gorethink.Table("events").Insert(event, gorethink.InsertOpts{Conflict: "replace"}).Exec(Rethink)
 	if err != nil {
 		log.Println(err)
 	}
