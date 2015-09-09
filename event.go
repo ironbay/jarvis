@@ -7,6 +7,7 @@ import (
 
 	"github.com/dancannon/gorethink"
 	"github.com/kr/pretty"
+	"github.com/twinj/uuid"
 )
 
 type Event struct {
@@ -31,6 +32,8 @@ func Emit(event *Event) error {
 	schema, ok := schemas[event.Type]
 	if ok {
 		event.ID = schema.Generate(event.Model)
+	} else {
+		event.ID = uuid.Formatter(uuid.NewV4(), uuid.CleanHyphen)
 	}
 	pretty.Print(event)
 	fmt.Println("\n")
