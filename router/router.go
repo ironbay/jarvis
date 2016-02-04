@@ -1,6 +1,9 @@
 package router
 
 import (
+	"encoding/json"
+	"log"
+
 	"github.com/ironbay/delta/uuid"
 	"github.com/ironbay/drs/drs-go"
 	"github.com/ironbay/jarvis/event"
@@ -17,29 +20,49 @@ func New() *Router {
 }
 
 func (this *Router) Add(input *Registration) {
-	input.Key = uuid.Ascending()
+	if input.Key == "" {
+		input.Key = uuid.Ascending()
+	}
 	input.Chan = make(chan *event.Event)
 	this.registrations[input.Key] = input
 }
 
 func (this *Router) Remove(key string) {
-	match := this.registrations[key]
+	match, ok := this.registrations[key]
+	if !ok {
+		return
+	}
 	close(match.Chan)
 	delete(this.registrations, key)
 }
 
-func (this *Router) Process(evt *event.Event) {
+func (this *Router) Emit(evt *event.Event) {
+	data, _ := json.MarshalIndent(evt, "", "  ")
+	log.Println(string(data))
+	matched := false
 	for _, reg := range this.registrations {
 		match := compare(reg.Context, evt.Context)
 		if match {
 			if reg.Kind == evt.Kind {
-				reg.Chan <- evt
+				matched = true
+				if reg.Hook != nil {
+					reg.Hook(evt)
+				} else {
+					reg.Chan <- evt
+				}
 			}
 		}
-		if reg.Once && match {
-			this.Remove(reg.Key)
+	}
+	if matched {
+		for _, reg := range this.registrations {
+			if !reg.Once {
+				continue
+			}
+			match := compare(reg.Context, evt.Context)
+			if match {
+				this.Remove(reg.Key)
+			}
 		}
-
 	}
 }
 

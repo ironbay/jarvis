@@ -6,9 +6,10 @@ import (
 )
 
 type Registration struct {
-	Key     string `json:"key"`
-	Once    bool   `json:"once"`
-	Kind    string `json:"kind"`
-	Chan    chan *event.Event
-	Context drs.Dynamic `json:"context"`
+	Key     string                 `json:"key"`
+	Once    bool                   `json:"once"`
+	Kind    string                 `json:"kind"`
+	Chan    chan *event.Event      `json:"-"`
+	Hook    func(evt *event.Event) `json:"-"`
+	Context drs.Dynamic            `json:"context"`
 }

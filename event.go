@@ -11,7 +11,16 @@ func init() {
 		if evt == nil {
 			return nil, nil
 		}
-		server.router.Process(evt)
+		if evt.Context == nil {
+			evt.Context = make(drs.Dynamic)
+		}
+		if evt.Data == nil {
+			evt.Data = make(drs.Dynamic)
+		}
+		if evt.Context == nil {
+
+		}
+		server.router.Emit(evt)
 		return true, nil
 	})
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/ironbay/delta/uuid"
 	"github.com/ironbay/drs/drs-go"
 	"github.com/ironbay/jarvis/event"
 	"github.com/ironbay/jarvis/router"
@@ -14,22 +15,32 @@ func init() {
 		args := cmd.Dynamic()
 		reg := new(router.Registration)
 		mapstructure.Decode(args, reg)
-		log.Print(reg)
+		reg.Key = uuid.Ascending()
+		registrations := conn.Get("registrations").(map[string]*router.Registration)
+		registrations[reg.Key] = reg
 		if !reg.Once {
+			log.Println("Registering for", reg.Kind)
 			go listen(conn, reg)
 			return true, nil
 		}
-		return listen(conn, reg), nil
+		log.Println("Once register", reg.Kind)
+		return listen(conn, reg)
 	})
 }
 
-func listen(conn *drs.Connection, reg *router.Registration) *event.Event {
+func listen(conn *drs.Connection, reg *router.Registration) (*event.Event, error) {
 	server.router.Add(reg)
 	for evt := range reg.Chan {
+		if reg.Once {
+			return evt, nil
+		}
 		conn.Encode(&drs.Command{
-			Action: "jarvis.event",
+			Action: "jarvis." + evt.Kind,
 			Body:   evt,
 		})
 	}
-	return nil
+	if reg.Once {
+		return nil, drs.Error("Cancelled")
+	}
+	return nil, nil
 }
