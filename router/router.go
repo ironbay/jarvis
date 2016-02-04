@@ -24,6 +24,17 @@ func (this *Router) Add(input *Registration) {
 		input.Key = uuid.Ascending()
 	}
 	input.Chan = make(chan *event.Event)
+	if input.Once {
+		for _, reg := range this.registrations {
+			if !reg.Once {
+				continue
+			}
+			match := compare(input.Context, reg.Context)
+			if match {
+				this.Remove(reg.Key)
+			}
+		}
+	}
 	this.registrations[input.Key] = input
 }
 
@@ -39,28 +50,15 @@ func (this *Router) Remove(key string) {
 func (this *Router) Emit(evt *event.Event) {
 	data, _ := json.MarshalIndent(evt, "", "  ")
 	log.Println(string(data))
-	matched := false
 	for _, reg := range this.registrations {
 		match := compare(reg.Context, evt.Context)
 		if match {
 			if reg.Kind == evt.Kind {
-				matched = true
 				if reg.Hook != nil {
 					reg.Hook(evt)
 				} else {
 					reg.Chan <- evt
 				}
-			}
-		}
-	}
-	if matched {
-		for _, reg := range this.registrations {
-			if !reg.Once {
-				continue
-			}
-			match := compare(reg.Context, evt.Context)
-			if match {
-				this.Remove(reg.Key)
 			}
 		}
 	}
