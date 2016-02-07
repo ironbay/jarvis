@@ -25,17 +25,21 @@ func (this *Router) Add(input *Registration) {
 	}
 	input.Chan = make(chan *event.Event)
 	if input.Once {
-		for _, reg := range this.registrations {
-			if !reg.Once {
-				continue
-			}
-			match := compare(input.Context, reg.Context)
-			if match {
-				this.Remove(reg.Key)
-			}
-		}
+		this.clear(input.Context)
 	}
 	this.registrations[input.Key] = input
+}
+
+func (this *Router) clear(ctx drs.Dynamic) {
+	for _, reg := range this.registrations {
+		if !reg.Once {
+			continue
+		}
+		match := compare(ctx, reg.Context)
+		if match {
+			this.Remove(reg.Key)
+		}
+	}
 }
 
 func (this *Router) Remove(key string) {
@@ -43,6 +47,7 @@ func (this *Router) Remove(key string) {
 	if !ok {
 		return
 	}
+	log.Println("Unregistered", match.Kind)
 	close(match.Chan)
 	delete(this.registrations, key)
 }
