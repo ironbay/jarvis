@@ -35,6 +35,7 @@ func listen(conn *drs.Connection, reg *router.Registration) (*event.Event, error
 			return evt, nil
 		}
 		conn.Encode(&drs.Command{
+			Key: uuid.Ascending(),
 			Action: "jarvis." + evt.Kind,
 			Body:   evt,
 		})

@@ -1,6 +1,9 @@
 package main
 
 import (
+	"encoding/json"
+	"log"
+
 	"github.com/ironbay/drs/drs-go"
 	"github.com/ironbay/jarvis/event"
 )
@@ -18,8 +21,10 @@ func init() {
 			evt.Data = make(drs.Dynamic)
 		}
 		if evt.Context == nil {
-
+			evt.Context = make(drs.Dynamic)
 		}
+		data, _ := json.MarshalIndent(evt, "", "  ")
+		log.Println(string(data))
 		server.router.Emit(evt)
 		return true, nil
 	})
