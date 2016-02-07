@@ -1,7 +1,6 @@
 package router
 
 import (
-	"encoding/json"
 	"log"
 
 	"github.com/ironbay/delta/uuid"
@@ -53,8 +52,8 @@ func (this *Router) Remove(key string) {
 }
 
 func (this *Router) Emit(evt *event.Event) {
-	data, _ := json.MarshalIndent(evt, "", "  ")
-	log.Println(string(data))
+	// data, _ := json.MarshalIndent(evt, "", "  ")
+	// log.Println(string(data))
 	for _, reg := range this.registrations {
 		match := compare(reg.Context, evt.Context)
 		if match {

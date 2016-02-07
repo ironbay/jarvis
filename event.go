@@ -10,6 +10,8 @@ import (
 
 func init() {
 	server.pipe.On("jarvis.event", func(cmd *drs.Command, conn *drs.Connection, ctx drs.Dynamic) (interface{}, error) {
+		data, _ := json.MarshalIndent(cmd.Body, "", "  ")
+		log.Println(string(data))
 		evt := event.From(cmd.Body)
 		if evt == nil {
 			return nil, nil
@@ -23,8 +25,6 @@ func init() {
 		if evt.Context == nil {
 			evt.Context = make(drs.Dynamic)
 		}
-		data, _ := json.MarshalIndent(evt, "", "  ")
-		log.Println(string(data))
 		server.router.Emit(evt)
 		return true, nil
 	})
