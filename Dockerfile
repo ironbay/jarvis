@@ -1,5 +1,6 @@
 FROM tutum.co/dax/go:master
 
+WORKDIR /go/src/github.com/ironbay/jarvis
 ADD . .
 RUN go get -v ./..
 RUN go build *.go
