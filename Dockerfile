@@ -4,8 +4,8 @@ WORKDIR /go/src/github.com/ironbay/jarvis/
 COPY . .
 RUN ls -lah
 RUN go get -v
-RUN go build *.go
+RUN go build
 
-CMD go run *.go
+CMD ./jarvis
 
 EXPOSE 12000
