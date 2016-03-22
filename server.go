@@ -1,12 +1,14 @@
 package main
 
 import (
+	"io"
 	"log"
 
 	"golang.org/x/net/websocket"
 
 	"github.com/ironbay/drs/drs-go"
-	"github.com/ironbay/drs/drs-go/transport/ws"
+	"github.com/ironbay/drs/drs-go/transports/ws"
+	"github.com/ironbay/dynamic"
 	"github.com/ironbay/jarvis/router"
 )
 
@@ -17,26 +19,26 @@ type Server struct {
 
 var server = func() *Server {
 	result := new(Server)
-	result.pipe, _ = ws.New(make(drs.Dynamic))
-	result.pipe.Events.Connect = func(conn *drs.Connection) error {
-		ws := conn.Raw.(*websocket.Conn)
+	result.pipe = drs.New(ws.New(dynamic.Empty()))
+	result.pipe.OnConnect = func(conn *drs.Connection, raw io.ReadWriteCloser) error {
+		ws := raw.(*websocket.Conn)
 		request := ws.Request()
 		ip := request.RemoteAddr
 		headers := request.Header["X-Forwarded-For"]
 		if len(headers) > 0 {
 			ip = headers[0]
 		}
-		conn.Set("ip", ip)
-		conn.Set("registrations", map[string]*router.Registration{})
+		conn.Cache.Set("ip", ip)
+		conn.Cache.Set("registrations", map[string]*router.Registration{})
 		log.Println(ip, "Connected")
 		return nil
 	}
-	result.pipe.Events.Disconnect = func(conn *drs.Connection) error {
-		registrations := conn.Get("registrations").(map[string]*router.Registration)
+	result.pipe.OnDisconnect = func(conn *drs.Connection) {
+		match, _ := conn.Cache.Get("registrations")
+		registrations := match.(map[string]*router.Registration)
 		for key := range registrations {
 			result.router.Remove(key)
 		}
-		return nil
 	}
 	result.router = router.New()
 

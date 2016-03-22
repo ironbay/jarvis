@@ -6,9 +6,9 @@ import (
 )
 
 type Event struct {
-	Kind    string      `json:"kind"`
-	Data    drs.Dynamic `json:"data"`
-	Context drs.Dynamic `json:"context"`
+	Kind    string                 `json:"kind"`
+	Data    map[string]interface{} `json:"data"`
+	Context map[string]interface{} `json:"context"`
 }
 
 func From(input interface{}) *Event {

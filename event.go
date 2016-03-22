@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-	server.pipe.On("jarvis.event", func(cmd *drs.Command, conn *drs.Connection, ctx drs.Dynamic) (interface{}, error) {
+	server.pipe.On("jarvis.event", func(cmd *drs.Command, conn *drs.Connection, ctx map[string]interface{}) (interface{}, error) {
 		data, _ := json.MarshalIndent(cmd.Body, "", "  ")
 		log.Println(string(data))
 		evt := event.From(cmd.Body)
