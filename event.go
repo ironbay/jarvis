@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/ironbay/drs/drs-go"
+	"github.com/ironbay/dynamic"
 	"github.com/ironbay/jarvis/event"
 )
 
@@ -17,13 +18,13 @@ func init() {
 			return nil, nil
 		}
 		if evt.Context == nil {
-			evt.Context = make(drs.Dynamic)
+			evt.Context = dynamic.Empty()
 		}
 		if evt.Data == nil {
-			evt.Data = make(drs.Dynamic)
+			evt.Data = dynamic.Empty()
 		}
 		if evt.Context == nil {
-			evt.Context = make(drs.Dynamic)
+			evt.Context = dynamic.Empty()
 		}
 		server.router.Emit(evt)
 		return true, nil

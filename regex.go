@@ -3,7 +3,7 @@ package main
 import (
 	"regexp"
 
-	"github.com/ironbay/drs/drs-go"
+	"github.com/ironbay/dynamic"
 	"github.com/ironbay/jarvis/event"
 	"github.com/ironbay/jarvis/router"
 )
@@ -37,7 +37,7 @@ func init() {
 				if len(match) == 0 {
 					continue
 				}
-				data := drs.Dynamic{}
+				data := dynamic.Empty()
 				for i, name := range cr.regex.SubexpNames() {
 					if name == "" {
 						continue
