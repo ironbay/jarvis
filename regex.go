@@ -16,7 +16,7 @@ type ChatRegex struct {
 
 func init() {
 	patterns := map[string]*ChatRegex{}
-	server.router.Add(&router.Registration{
+	jarvis.router.Add(&router.Registration{
 		Kind: "chat.regex",
 		Hook: func(evt *event.Event) {
 			cr := &ChatRegex{
@@ -28,7 +28,7 @@ func init() {
 		},
 	})
 
-	server.router.Add(&router.Registration{
+	jarvis.router.Add(&router.Registration{
 		Kind: "chat.message",
 		Hook: func(inner *event.Event) {
 			text := inner.Data["text"].(string)
@@ -44,7 +44,7 @@ func init() {
 					}
 					data[name] = match[i]
 				}
-				server.router.Emit(&event.Event{
+				jarvis.router.Emit(&event.Event{
 					Kind:    cr.kind,
 					Data:    data,
 					Context: inner.Context,

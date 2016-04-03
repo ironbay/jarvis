@@ -12,15 +12,15 @@ import (
 	"github.com/ironbay/jarvis/router"
 )
 
-type Server struct {
+type Jarvis struct {
 	router *router.Router
-	pipe   *drs.Pipe
+	server *drs.Server
 }
 
-var server = func() *Server {
-	result := new(Server)
-	result.pipe = drs.New(ws.New(dynamic.Empty()))
-	result.pipe.OnConnect = func(conn *drs.Connection, raw io.ReadWriteCloser) error {
+var jarvis = func() *Jarvis {
+	result := new(Jarvis)
+	result.server = drs.NewServer(ws.New(dynamic.Empty()))
+	result.server.OnConnect(func(conn *drs.Connection, raw io.ReadWriteCloser) error {
 		ws := raw.(*websocket.Conn)
 		request := ws.Request()
 		ip := request.RemoteAddr
@@ -32,14 +32,14 @@ var server = func() *Server {
 		conn.Cache.Set("registrations", map[string]*router.Registration{})
 		log.Println(ip, "Connected")
 		return nil
-	}
-	result.pipe.OnDisconnect = func(conn *drs.Connection) {
+	})
+	result.server.OnDisconnect(func(conn *drs.Connection) {
 		match, _ := conn.Cache.Get("registrations")
 		registrations := match.(map[string]*router.Registration)
 		for key := range registrations {
 			result.router.Remove(key)
 		}
-	}
+	})
 	result.router = router.New()
 
 	return result
@@ -47,5 +47,5 @@ var server = func() *Server {
 
 func main() {
 	log.Println("Listening...")
-	server.pipe.Listen()
+	jarvis.server.Listen()
 }

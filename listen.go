@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	server.pipe.On("jarvis.listen", func(cmd *drs.Command, conn *drs.Connection, ctx map[string]interface{}) (interface{}, error) {
+	jarvis.server.On("jarvis.listen", func(cmd *drs.Command, conn *drs.Connection, ctx map[string]interface{}) (interface{}, error) {
 		args := cmd.Map()
 		reg := new(router.Registration)
 		mapstructure.Decode(args, reg)
@@ -20,24 +20,24 @@ func init() {
 		registrations := match.(map[string]*router.Registration)
 		registrations[reg.Key] = reg
 		if !reg.Once {
-			log.Println("Registering for", reg.Kind)
+			log.Println("Registering Forever", reg.Kind)
 			go listen(conn, reg)
 			return true, nil
 		}
-		log.Println("Once register", reg.Kind)
+		log.Println("Registering Once", reg.Kind)
 		return listen(conn, reg)
 	})
 }
 
 func listen(conn *drs.Connection, reg *router.Registration) (*event.Event, error) {
-	server.router.Add(reg)
+	jarvis.router.Add(reg)
 	for evt := range reg.Chan {
 		if reg.Once {
 			return evt, nil
 		}
 		conn.Fire(&drs.Command{
 			Key:    uuid.Ascending(),
-			Action: "jarvis." + evt.Kind,
+			Action: evt.Kind,
 			Body:   evt,
 		})
 	}
