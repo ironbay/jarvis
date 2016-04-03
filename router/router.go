@@ -5,7 +5,7 @@ import (
 
 	"github.com/ironbay/delta/uuid"
 	"github.com/ironbay/drs/drs-go"
-	"github.com/ironbay/jarvis/event"
+	"github.com/ironbay/dynamic"
 )
 
 type Router struct {
@@ -22,7 +22,7 @@ func (this *Router) Add(input *Registration) {
 	if input.Key == "" {
 		input.Key = uuid.Ascending()
 	}
-	input.Chan = make(chan *event.Event)
+	input.Chan = make(chan *drs.Command)
 	if input.Once {
 		this.clear(input.Context)
 	}
@@ -46,22 +46,23 @@ func (this *Router) Remove(key string) {
 	if !ok {
 		return
 	}
-	log.Println("Unregistered", match.Kind)
+	log.Println("Unregistered", match.Action)
 	close(match.Chan)
 	delete(this.registrations, key)
 }
 
-func (this *Router) Emit(evt *event.Event) {
+func (this *Router) Emit(cmd *drs.Command) {
 	// data, _ := json.MarshalIndent(evt, "", "  ")
 	// log.Println(string(data))
+	ctx := dynamic.Object(cmd.Map(), "context")
 	for _, reg := range this.registrations {
-		match := compare(reg.Context, evt.Context)
+		match := compare(reg.Context, ctx)
 		if match {
-			if reg.Kind == evt.Kind {
+			if reg.Action == cmd.Action {
 				if reg.Hook != nil {
-					reg.Hook(evt)
+					reg.Hook(cmd)
 				} else {
-					reg.Chan <- evt
+					reg.Chan <- cmd
 				}
 			}
 		}

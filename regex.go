@@ -3,25 +3,28 @@ package main
 import (
 	"regexp"
 
+	"github.com/ironbay/drs/drs-go"
 	"github.com/ironbay/dynamic"
-	"github.com/ironbay/jarvis/event"
 	"github.com/ironbay/jarvis/router"
 )
 
 type ChatRegex struct {
 	pattern string
-	kind    string
+	action  string
 	regex   *regexp.Regexp
 }
 
 func init() {
 	patterns := map[string]*ChatRegex{}
 	jarvis.router.Add(&router.Registration{
-		Kind: "chat.regex",
-		Hook: func(evt *event.Event) {
+		Action: "chat.regex",
+		Hook: func(cmd *drs.Command) {
+			body := cmd.Map()
+			pattern := dynamic.String(body, "data", "pattern")
+			action := dynamic.String(body, "data", "action")
 			cr := &ChatRegex{
-				pattern: "(?i)" + evt.Data["pattern"].(string),
-				kind:    evt.Data["kind"].(string),
+				pattern: "(?i)" + pattern,
+				action:  action,
 			}
 			cr.regex = regexp.MustCompile(cr.pattern)
 			patterns[cr.pattern] = cr
@@ -29,9 +32,10 @@ func init() {
 	})
 
 	jarvis.router.Add(&router.Registration{
-		Kind: "chat.message",
-		Hook: func(inner *event.Event) {
-			text := inner.Data["text"].(string)
+		Action: "chat.message",
+		Hook: func(cmd *drs.Command) {
+			body := cmd.Map()
+			text := dynamic.String(body, "data", "text")
 			for _, cr := range patterns {
 				match := cr.regex.FindStringSubmatch(text)
 				if len(match) == 0 {
@@ -44,10 +48,12 @@ func init() {
 					}
 					data[name] = match[i]
 				}
-				jarvis.router.Emit(&event.Event{
-					Kind:    cr.kind,
-					Data:    data,
-					Context: inner.Context,
+				jarvis.router.Emit(&drs.Command{
+					Action: cr.action,
+					Body: dynamic.Build(
+						"data", data,
+						"context", dynamic.Get(body, "context"),
+					),
 				})
 			}
 		},

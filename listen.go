@@ -5,7 +5,6 @@ import (
 
 	"github.com/ironbay/delta/uuid"
 	"github.com/ironbay/drs/drs-go"
-	"github.com/ironbay/jarvis/event"
 	"github.com/ironbay/jarvis/router"
 	"github.com/mitchellh/mapstructure"
 )
@@ -20,26 +19,22 @@ func init() {
 		registrations := match.(map[string]*router.Registration)
 		registrations[reg.Key] = reg
 		if !reg.Once {
-			log.Println("Registering Forever", reg.Kind)
+			log.Println("Registering Forever", reg.Action)
 			go listen(conn, reg)
 			return true, nil
 		}
-		log.Println("Registering Once", reg.Kind)
+		log.Println("Registering Once", reg.Action)
 		return listen(conn, reg)
 	})
 }
 
-func listen(conn *drs.Connection, reg *router.Registration) (*event.Event, error) {
+func listen(conn *drs.Connection, reg *router.Registration) (interface{}, error) {
 	jarvis.router.Add(reg)
-	for evt := range reg.Chan {
+	for cmd := range reg.Chan {
 		if reg.Once {
-			return evt, nil
+			return cmd.Body, nil
 		}
-		conn.Fire(&drs.Command{
-			Key:    uuid.Ascending(),
-			Action: evt.Kind,
-			Body:   evt,
-		})
+		conn.Fire(cmd)
 	}
 	if reg.Once {
 		return nil, drs.Error("Cancelled")

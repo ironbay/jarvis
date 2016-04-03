@@ -1,15 +1,12 @@
 package router
 
-import (
-	"github.com/ironbay/drs/drs-go"
-	"github.com/ironbay/jarvis/event"
-)
+import "github.com/ironbay/drs/drs-go"
 
 type Registration struct {
 	Key     string                 `json:"key"`
 	Once    bool                   `json:"once"`
-	Kind    string                 `json:"kind"`
-	Chan    chan *event.Event      `json:"-"`
-	Hook    func(evt *event.Event) `json:"-"`
-	Context drs.Dynamic            `json:"context"`
+	Action  string                 `json:"action"`
+	Chan    chan *drs.Command      `json:"-"`
+	Hook    func(cmd *drs.Command) `json:"-"`
+	Context map[string]interface{} `json:"context"`
 }
