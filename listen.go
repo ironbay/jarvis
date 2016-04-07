@@ -30,6 +30,7 @@ func init() {
 
 func listen(conn *drs.Connection, reg *router.Registration) (interface{}, error) {
 	jarvis.router.Add(reg)
+	defer jarvis.router.Remove(reg.Key)
 	for cmd := range reg.Chan {
 		if reg.Once {
 			return cmd.Body, nil
