@@ -22,7 +22,6 @@ func (this *Router) Add(input *Registration) {
 	if input.Key == "" {
 		input.Key = uuid.Ascending()
 	}
-	input.Chan = make(chan *drs.Command)
 	if input.Once {
 		this.clear(input.Context)
 	}
@@ -46,8 +45,8 @@ func (this *Router) Remove(key string) {
 	if !ok {
 		return
 	}
+	match.Hook(nil)
 	log.Println("Unregistered", match.Action)
-	close(match.Chan)
 	delete(this.registrations, key)
 }
 
@@ -59,11 +58,7 @@ func (this *Router) Emit(cmd *drs.Command) {
 		match := compare(reg.Context, ctx)
 		if match {
 			if reg.Action == cmd.Action {
-				if reg.Hook != nil {
-					reg.Hook(cmd)
-				} else {
-					reg.Chan <- cmd
-				}
+				reg.Hook(cmd)
 			}
 		}
 	}

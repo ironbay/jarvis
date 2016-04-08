@@ -1,62 +1,82 @@
 package client
 
 import (
-	"log"
-
 	"github.com/ironbay/drs/drs-go"
-	"github.com/ironbay/drs/drs-go/transport/ws"
-	"github.com/ironbay/jarvis/event"
-	"github.com/ironbay/jarvis/router"
+	"github.com/ironbay/drs/drs-go/protocol"
+	"github.com/ironbay/drs/drs-go/transports/ws"
+	"github.com/ironbay/dynamic"
 )
 
 type Client struct {
-	pipe   *drs.Pipe
-	router *router.Router
+	connection *drs.Connection
 }
 
-func New() *Client {
-	pipe, _ := ws.New(drs.Dynamic{})
-	pipe.Router = func(string) (string, error) { return "localhost:12000", nil }
-	return &Client{
-		pipe:   pipe,
-		router: router.New(),
+type Session struct {
+	Data       map[string]interface{}
+	Context    map[string]interface{}
+	connection *drs.Connection
+}
+
+func New(host string) *Client {
+	transport := ws.New(dynamic.Empty())
+	client := &Client{
+		connection: drs.NewConnection(protocol.JSON),
 	}
+	go client.connection.Dial(transport, host, true)
+	return client
 }
 
-func (this *Client) On(kind string, ctx drs.Dynamic, cb func(*event.Event)) {
-	log.Println("Sending")
-	this.pipe.Send(&drs.Command{
+func (this *Client) On(action string, cb func(*Session)) {
+	this.connection.Fire(&drs.Command{
 		Action: "jarvis.listen",
-		Body: &router.Registration{
-			Kind:    kind,
-			Context: ctx,
-		},
+		Body: dynamic.Build(
+			"action", action,
+		),
 	})
-	this.pipe.On("jarvis."+kind, func(cmd *drs.Command, conn *drs.Connection, ctx drs.Dynamic) (interface{}, error) {
-		evt := event.From(cmd.Body)
-		go cb(evt)
+	this.connection.On(action, func(cmd *drs.Command, conn *drs.Connection, ctx map[string]interface{}) (interface{}, error) {
+		body := cmd.Map()
+		context := dynamic.Object(body, "context")
+		data := dynamic.Object(body, "data")
+		cb(&Session{
+			Context:    context,
+			Data:       data,
+			connection: this.connection,
+		})
 		return true, nil
 	})
 }
 
-func (this *Client) Once(kind string, ctx drs.Dynamic) *event.Event {
-	res, err := this.pipe.Send(&drs.Command{
-		Action: "jarvis.listen",
-		Body: &router.Registration{
-			Kind:    kind,
-			Context: ctx,
-			Once:    true,
-		},
+func (this *Client) Regex(action string, pattern string) {
+	this.connection.Request(&drs.Command{
+		Action: "chat.regex",
+		Body: dynamic.Build(
+			"data", dynamic.Build(
+				"pattern", pattern,
+				"action", action,
+			),
+		),
 	})
-	if err != nil {
-		panic(err)
-	}
-	return event.From(res)
 }
 
-func (this *Client) Send(evt *event.Event) {
-	this.pipe.Send(&drs.Command{
-		Action: "jarvis.event",
-		Body:   evt,
+func (this *Session) Response(text string) {
+	this.connection.Request(&drs.Command{
+		Action: "chat.response",
+		Body: dynamic.Build(
+			"data", dynamic.Build(
+				"text", text,
+			),
+			"context", this.Context,
+		),
+	})
+}
+
+func (this *Session) Once(action string) (interface{}, error) {
+	return this.connection.Request(&drs.Command{
+		Action: "jarvis.listen",
+		Body: dynamic.Build(
+			"action", action,
+			"context", this.Context,
+			"once", true,
+		),
 	})
 }

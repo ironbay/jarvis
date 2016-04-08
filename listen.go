@@ -1,8 +1,6 @@
 package main
 
 import (
-	"log"
-
 	"github.com/ironbay/delta/uuid"
 	"github.com/ironbay/drs/drs-go"
 	"github.com/ironbay/jarvis/router"
@@ -19,15 +17,24 @@ func init() {
 		registrations := match.(map[string]*router.Registration)
 		registrations[reg.Key] = reg
 		if !reg.Once {
-			log.Println("Registering Forever", reg.Action)
-			go listen(conn, reg)
+			reg.Hook = func(cmd *drs.Command) {
+				conn.Fire(cmd)
+			}
 			return true, nil
 		}
-		log.Println("Registering Once", reg.Action)
-		return listen(conn, reg)
+		ch := make(chan *drs.Command)
+		reg.Hook = func(cmd *drs.Command) {
+			ch <- cmd
+		}
+		result := <-ch
+		if result == nil {
+			return nil, drs.Error("Cancelled")
+		}
+		return result, nil
 	})
 }
 
+/*
 func listen(conn *drs.Connection, reg *router.Registration) (interface{}, error) {
 	jarvis.router.Add(reg)
 	defer jarvis.router.Remove(reg.Key)
@@ -42,3 +49,5 @@ func listen(conn *drs.Connection, reg *router.Registration) (interface{}, error)
 	}
 	return nil, nil
 }
+
+*/
