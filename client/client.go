@@ -81,7 +81,7 @@ func (this *Session) Once(action string) (interface{}, error) {
 	})
 }
 
-func (this *Session) Emit(action string, data map[string]interface{}) {
+func (this *Session) Emit(action string, data interface{}) {
 	this.connection.Request(&drs.Command{
 		Action: action,
 		Body: dynamic.Build(
@@ -91,7 +91,7 @@ func (this *Session) Emit(action string, data map[string]interface{}) {
 	})
 }
 
-func (this *Client) Emit(action string, data map[string]interface{}, context map[string]interface{}) {
+func (this *Client) Emit(action string, data interface{}, context map[string]interface{}) {
 	this.connection.Request(&drs.Command{
 		Action: action,
 		Body: dynamic.Build(
