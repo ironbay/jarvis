@@ -47,7 +47,7 @@ func (this *Router) Remove(key string) {
 	if !ok {
 		return
 	}
-	match.Hook(nil)
+	go match.Hook(nil)
 	log.Println("Unregistered", match.Action)
 	delete(this.registrations, key)
 }
