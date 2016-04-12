@@ -6,6 +6,7 @@ import (
 	"github.com/ironbay/delta/uuid"
 	"github.com/ironbay/drs/drs-go"
 	"github.com/ironbay/dynamic"
+	"github.com/ironbay/go-util/console"
 )
 
 type Router struct {
@@ -53,6 +54,7 @@ func (this *Router) Remove(key string) {
 func (this *Router) Emit(cmd *drs.Command) {
 	// data, _ := json.MarshalIndent(evt, "", "  ")
 	// log.Println(string(data))
+	console.JSON(cmd)
 	ctx := dynamic.Object(cmd.Map(), "context")
 	for _, reg := range this.registrations {
 		match := compare(reg.Context, ctx)
