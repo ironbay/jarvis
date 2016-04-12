@@ -26,6 +26,7 @@ func (this *Router) Add(input *Registration) {
 	if input.Once {
 		this.clear(input.Context)
 	}
+	console.JSON(input)
 	this.registrations[input.Key] = input
 }
 

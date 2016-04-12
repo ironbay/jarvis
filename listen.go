@@ -14,7 +14,6 @@ func init() {
 		reg := new(router.Registration)
 		mapstructure.Decode(args, reg)
 		reg.Key = uuid.Ascending()
-		jarvis.router.Add(reg)
 		match, _ := msg.Connection.Cache.Get("registrations")
 		registrations := match.(map[string]*router.Registration)
 		registrations[reg.Key] = reg
@@ -28,6 +27,7 @@ func init() {
 		reg.Hook = func(cmd *drs.Command) {
 			ch <- cmd
 		}
+		jarvis.router.Add(reg)
 		result := <-ch
 		if result == nil {
 			return nil, actor.Error("Cancelled")
