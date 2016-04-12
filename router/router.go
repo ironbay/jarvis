@@ -60,7 +60,7 @@ func (this *Router) Emit(cmd *drs.Command) {
 		match := compare(reg.Context, ctx)
 		if match {
 			if reg.Action == cmd.Action {
-				reg.Hook(cmd)
+				go reg.Hook(cmd)
 			}
 		}
 	}
