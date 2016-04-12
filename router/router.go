@@ -20,6 +20,7 @@ func New() *Router {
 }
 
 func (this *Router) Add(input *Registration) {
+	log.Println("Subscribed to", input.Action)
 	if input.Key == "" {
 		input.Key = uuid.Ascending()
 	}

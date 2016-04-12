@@ -1,6 +1,8 @@
 package client
 
 import (
+	"log"
+
 	"github.com/ironbay/drs/drs-go"
 	"github.com/ironbay/drs/drs-go/protocol"
 	"github.com/ironbay/drs/drs-go/transports/ws"
@@ -30,7 +32,8 @@ func New(host string, dc func(err error)) (*Client, error) {
 }
 
 func (this *Client) On(action string, cb func(*Session)) {
-	this.connection.Fire(&drs.Command{
+	log.Println("Listening")
+	this.connection.Request(&drs.Command{
 		Action: "jarvis.listen",
 		Body: dynamic.Build(
 			"action", action,
