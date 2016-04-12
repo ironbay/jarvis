@@ -19,6 +19,7 @@ func init() {
 		match, _ := msg.Connection.Cache.Get("registrations")
 		registrations := match.(map[string]*router.Registration)
 		registrations[reg.Key] = reg
+		jarvis.router.Add(reg)
 		if !reg.Once {
 			reg.Hook = func(cmd *drs.Command) {
 				msg.Connection.Fire(cmd)
@@ -29,7 +30,6 @@ func init() {
 		reg.Hook = func(cmd *drs.Command) {
 			ch <- cmd
 		}
-		jarvis.router.Add(reg)
 		result := <-ch
 		if result == nil {
 			return nil, actor.Error("Cancelled")
