@@ -3,22 +3,23 @@ package main
 import (
 	"github.com/ironbay/delta/uuid"
 	"github.com/ironbay/drs/drs-go"
+	"github.com/ironbay/go-util/actor"
 	"github.com/ironbay/jarvis/router"
 	"github.com/mitchellh/mapstructure"
 )
 
 func init() {
-	jarvis.server.On("jarvis.listen", func(cmd *drs.Command, conn *drs.Connection, ctx map[string]interface{}) (interface{}, error) {
-		args := cmd.Map()
+	jarvis.server.On("jarvis.listen", func(msg *drs.Message) (interface{}, error) {
+		args := msg.Command.Map()
 		reg := new(router.Registration)
 		mapstructure.Decode(args, reg)
 		reg.Key = uuid.Ascending()
-		match, _ := conn.Cache.Get("registrations")
+		match, _ := msg.Connection.Cache.Get("registrations")
 		registrations := match.(map[string]*router.Registration)
 		registrations[reg.Key] = reg
 		if !reg.Once {
 			reg.Hook = func(cmd *drs.Command) {
-				conn.Fire(cmd)
+				msg.Connection.Fire(cmd)
 			}
 			return true, nil
 		}
@@ -28,7 +29,7 @@ func init() {
 		}
 		result := <-ch
 		if result == nil {
-			return nil, drs.Error("Cancelled")
+			return nil, actor.Error("Cancelled")
 		}
 		return result, nil
 	})

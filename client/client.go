@@ -17,13 +17,16 @@ type Session struct {
 	connection *drs.Connection
 }
 
-func New(host string) *Client {
+func New(host string, dc func(err error)) (*Client, error) {
 	transport := ws.New(dynamic.Empty())
 	client := &Client{
-		connection: drs.NewConnection(protocol.JSON),
+		connection: drs.NewConnection(),
 	}
-	go client.connection.Dial(transport, host, true)
-	return client
+	client.connection.OnDisconnect = dc
+	if err := client.connection.Dial(protocol.JSON, transport, host); err != nil {
+		return nil, err
+	}
+	return client, nil
 }
 
 func (this *Client) On(action string, cb func(*Session)) {
@@ -33,14 +36,14 @@ func (this *Client) On(action string, cb func(*Session)) {
 			"action", action,
 		),
 	})
-	this.connection.On(action, func(cmd *drs.Command, conn *drs.Connection, ctx map[string]interface{}) (interface{}, error) {
-		body := cmd.Map()
+	this.connection.On(action, func(msg *drs.Message) (interface{}, error) {
+		body := msg.Command.Map()
 		context := dynamic.Object(body, "context")
 		data := dynamic.Object(body, "data")
 		cb(&Session{
 			Context:    context,
 			Data:       data,
-			connection: this.connection,
+			connection: msg.Connection,
 		})
 		return true, nil
 	})
@@ -99,4 +102,8 @@ func (this *Client) Emit(action string, data interface{}, context map[string]int
 			"context", context,
 		),
 	})
+}
+
+func (this *Client) Close() {
+	this.connection.Close()
 }

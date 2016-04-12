@@ -6,9 +6,9 @@ import (
 )
 
 func init() {
-	jarvis.server.On("*", func(cmd *drs.Command, conn *drs.Connection, ctx map[string]interface{}) (interface{}, error) {
-		console.JSON(cmd)
-		jarvis.router.Emit(cmd)
+	jarvis.server.On("*", func(msg *drs.Message) (interface{}, error) {
+		console.JSON(msg.Command)
+		jarvis.router.Emit(msg.Command)
 		return true, nil
 	})
 }
