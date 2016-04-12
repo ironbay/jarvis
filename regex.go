@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"regexp"
 
 	"github.com/ironbay/drs/drs-go"
@@ -28,7 +27,6 @@ func init() {
 				action:  action,
 			}
 			cr.regex = regexp.MustCompile(cr.pattern)
-			log.Println("Regex Registered", pattern, "for", action)
 			patterns[cr.pattern] = cr
 		},
 	})

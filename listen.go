@@ -4,12 +4,14 @@ import (
 	"github.com/ironbay/delta/uuid"
 	"github.com/ironbay/drs/drs-go"
 	"github.com/ironbay/go-util/actor"
+	"github.com/ironbay/go-util/console"
 	"github.com/ironbay/jarvis/router"
 	"github.com/mitchellh/mapstructure"
 )
 
 func init() {
 	jarvis.server.On("jarvis.listen", func(msg *drs.Message) (interface{}, error) {
+		console.JSON(msg.Command)
 		args := msg.Command.Map()
 		reg := new(router.Registration)
 		mapstructure.Decode(args, reg)
