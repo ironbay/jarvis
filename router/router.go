@@ -20,7 +20,6 @@ func New() *Router {
 }
 
 func (this *Router) Add(input *Registration) {
-	log.Println("Subscribed to", input.Action)
 	if input.Key == "" {
 		input.Key = uuid.Ascending()
 	}
@@ -61,7 +60,6 @@ func (this *Router) Emit(cmd *drs.Command) {
 		match := compare(reg.Context, ctx)
 		if match {
 			if reg.Action == cmd.Action {
-				console.JSON("Delivering "+cmd.Action, ctx)
 				go reg.Hook(cmd)
 			}
 		}
