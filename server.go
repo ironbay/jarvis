@@ -7,6 +7,7 @@ import (
 	"golang.org/x/net/websocket"
 
 	"github.com/ironbay/drs/drs-go"
+	"github.com/ironbay/drs/drs-go/plugins/ping"
 	"github.com/ironbay/drs/drs-go/transports/ws"
 	"github.com/ironbay/dynamic"
 	"github.com/ironbay/jarvis/router"
@@ -20,6 +21,7 @@ type Jarvis struct {
 var jarvis = func() *Jarvis {
 	result := new(Jarvis)
 	result.server = drs.NewServer(ws.New(dynamic.Empty()))
+	ping.Attach(result.server.Processor)
 	result.server.OnConnect(func(conn *drs.Connection, raw io.ReadWriteCloser) error {
 		ws := raw.(*websocket.Conn)
 		request := ws.Request()
