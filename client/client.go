@@ -29,11 +29,12 @@ func New(host string, dc func(err error)) (*Client, error) {
 	return client, nil
 }
 
-func (this *Client) On(action string, cb func(*Session)) {
+func (this *Client) On(action string, ctx map[string]interface{}, cb func(*Session)) {
 	this.connection.Request(&drs.Command{
 		Action: "jarvis.listen",
 		Body: dynamic.Build(
 			"action", action,
+			"context", ctx,
 		),
 	})
 	this.connection.On(action, func(msg *drs.Message) (interface{}, error) {
