@@ -62,6 +62,17 @@ func (this *Client) Regex(action string, pattern string) {
 	})
 }
 
+func (this *Client) Once(action string, ctx map[string]interface{}) (interface{}, error) {
+	return this.connection.Request(&drs.Command{
+		Action: "jarvis.listen",
+		Body: dynamic.Build(
+			"action", action,
+			"context", ctx,
+			"once", true,
+		),
+	})
+}
+
 func (this *Session) Response(text string) {
 	this.connection.Request(&drs.Command{
 		Action: "chat.response",
