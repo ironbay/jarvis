@@ -29,7 +29,7 @@ func New(host string, dc func(err error)) (*Client, error) {
 	return client, nil
 }
 
-func (this *Client) On(action string, ctx map[string]interface{}, cb func(*Session)) {
+func (this *Client) On(action string, ctx map[string]interface{}, callbacks ...func(*Session)) {
 	this.connection.Request(&drs.Command{
 		Action: "jarvis.listen",
 		Body: dynamic.Build(
@@ -41,11 +41,13 @@ func (this *Client) On(action string, ctx map[string]interface{}, cb func(*Sessi
 		body := msg.Command.Map()
 		context := dynamic.Object(body, "context")
 		data := dynamic.Object(body, "data")
-		cb(&Session{
-			Context:    context,
-			Data:       data,
-			connection: msg.Connection,
-		})
+		for _, cb := range callbacks {
+			go cb(&Session{
+				Context:    dynamic.Clone(context),
+				Data:       dynamic.Clone(data),
+				connection: msg.Connection,
+			})
+		}
 		return true, nil
 	})
 }
