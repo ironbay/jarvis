@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"io"
 	"log"
+	"net/http"
 
 	"golang.org/x/net/websocket"
 
@@ -49,5 +51,28 @@ var jarvis = func() *Jarvis {
 
 func main() {
 	log.Println("Listening...")
+	http.HandleFunc("/command", func(w http.ResponseWriter, req *http.Request) {
+		d := json.NewDecoder(req.Body)
+		d.UseNumber()
+		cmd := new(drs.Command)
+		err := d.Decode(cmd)
+		if err != nil {
+			response(w, 500, err.Error())
+			return
+		}
+		res, err := jarvis.server.Process(cmd, new(drs.Connection))
+		if err != nil {
+			response(w, 500, err.Error())
+			return
+		}
+		response(w, 200, res)
+	})
 	jarvis.server.Listen(":12000")
+}
+
+func response(w http.ResponseWriter, status int, input interface{}) {
+	data, _ := json.Marshal(input)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	w.Write(data)
 }
