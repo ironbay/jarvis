@@ -87,6 +87,18 @@ func (this *Session) Response(text string) {
 	})
 }
 
+func (this *Session) Broadcast(text string) {
+	this.connection.Request(&drs.Command{
+		Action: "chat.broadcast",
+		Body: dynamic.Build(
+			"data", dynamic.Build(
+				"text", text,
+			),
+			"context", this.Context,
+		),
+	})
+}
+
 func (this *Session) Once(action string) (interface{}, error) {
 	return this.connection.Request(&drs.Command{
 		Action: "jarvis.listen",
