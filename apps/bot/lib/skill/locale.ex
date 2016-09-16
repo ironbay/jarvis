@@ -6,16 +6,20 @@ defmodule Bot.Skill.Locale do
 	end
 
 	def on({"locale.add", {action, template}, context}, bot, data) do
-		{:ok, Map.put(data, action, template)}
+		{:ok, Map.put(data, action, {template, "chat.response"})}
+	end
+
+	def on({"locale.broadcast", {action, template}, context}, bot, data) do
+		{:ok, Map.put(data, action, {template, "chat.broadcast"})}
 	end
 
 	def on({action, body, context}, bot, data) do
 		case Map.get(data, action) do
 			nil -> nil
-			template ->
+			{template, type} ->
 				formatted = EEx.eval_string(template, body |> Enum.into([]))
 				IO.inspect(context)
-				Bot.broadcast(bot, "chat.response", formatted, context)
+				Bot.broadcast(bot, type, formatted, context)
 		end
 		{:ok, data}
 	end

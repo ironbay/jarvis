@@ -30,6 +30,23 @@ defmodule Bot do
 	def init([key]) do
 		IO.puts("Starting Bot #{key}")
 		{:ok, skills} = Bot.Skill.Supervisor.start_link
+
+		# TODO: Load from config
+		Bot.Skill.Supervisor.start_skill(skills, Bot.Skill.Regex, [])
+		Bot.Skill.Supervisor.start_skill(skills, Bot.Skill.Locale, [])
+		Bot.Skill.Supervisor.start_skill(skills, Bot.Skill.Link, [])
+
+		Bot.Skill.Supervisor.start_skill(skills, Bot.Skill.Greeter, [])
+		Bot.Skill.Supervisor.start_skill(skills, Bot.Skill.Name, [])
+
+		Bot.Skill.Supervisor.start_skill(skills, Bot.Skill.Slack, ["xoxb-41877287558-bhzZMosiGo6cwr2its3UXsAD", ""])
+		Bot.Skill.Supervisor.start_skill(skills, Bot.Skill.Slack, ["xoxb-31798286241-A1mDAuVSWN39vrfphUg8Bmf6", "C07FCH70A"])
+
+		Bot.Skill.Supervisor.start_skill(skills, Bot.Skill.Reddit.Link, [])
+		Bot.Skill.Supervisor.start_skill(skills, Bot.Skill.Reddit.Poller, ["aww"])
+		Bot.Skill.Supervisor.start_skill(skills, Bot.Skill.Reddit.Poller, ["politics"])
+		Bot.Skill.Supervisor.start_skill(skills, Bot.Skill.Reddit.Poller, ["news"])
+
 		{:ok, %{
 			key: key,
 			pending: [],
@@ -108,13 +125,6 @@ defmodule Bot.Skill.Supervisor do
 
 	def init([bot]) do
 		children = [
-			skill(bot, Bot.Skill.Regex, []),
-			skill(bot, Bot.Skill.Locale, []),
-			skill(bot, Bot.Skill.Greeter, []),
-			skill(bot, Bot.Skill.Link, []),
-			skill(bot, Bot.Skill.Reddit, []),
-			skill(bot, Bot.Skill.Name, []),
-			skill(bot, Bot.Skill.Slack, ["xoxb-41877287558-bhzZMosiGo6cwr2its3UXsAD"]),
 		]
 		supervise(children, strategy: :one_for_one)
 	end
@@ -124,7 +134,8 @@ defmodule Bot.Skill.Supervisor do
 	end
 
 	# TODO: Load dynamically
-	def start_skill(module, args) do
+	def start_skill(sup, module, args) do
+		Supervisor.start_child(sup, worker(module, [self(), args], id: {module, args}))
 	end
 
 	def notify(pid, event) do

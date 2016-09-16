@@ -1,4 +1,4 @@
-defmodule Bot.Skill.Reddit do
+defmodule Bot.Skill.Reddit.Link do
 	use Bot.Skill
 
 	@base "https://www.reddit.com"

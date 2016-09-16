@@ -1,15 +1,21 @@
 defmodule Bot.Skill.Slack do
 	use Bot.Skill
 
-	def begin(bot, [token]) do
+	def begin(bot, [token, broadcast]) do
 		{:ok, conn} = Bot.Skill.Slack.Conn.start_link(token)
 		{:ok, %{
+			broadcast: broadcast,
 			conn: conn
 		}}
 	end
 
 	def on({"chat.response", text, %{type: "slack", channel: channel}}, bot, data = %{conn: conn}) do
 		send(conn, {:message, text, channel})
+		{:ok, data}
+	end
+
+	def on({"chat.broadcast", text, %{}}, bot, data = %{conn: conn, broadcast: broadcast}) when broadcast != "" do
+		send(conn, {:message, text, broadcast})
 		{:ok, data}
 	end
 
