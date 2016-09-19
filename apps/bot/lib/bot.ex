@@ -32,20 +32,21 @@ defmodule Bot do
 		{:ok, skills} = Bot.Skill.Supervisor.start_link
 
 		# TODO: Load from config
-		Bot.Skill.Supervisor.start_skill(skills, Bot.Skill.Regex, [])
-		Bot.Skill.Supervisor.start_skill(skills, Bot.Skill.Locale, [])
-		Bot.Skill.Supervisor.start_skill(skills, Bot.Skill.Link, [])
+		Bot.Skill.Supervisor.enable_skill(skills, Bot.Skill.Regex, [])
+		Bot.Skill.Supervisor.enable_skill(skills, Bot.Skill.Controller, [])
+		Bot.Skill.Supervisor.enable_skill(skills, Bot.Skill.Locale, [])
+		Bot.Skill.Supervisor.enable_skill(skills, Bot.Skill.Link, [])
 
-		Bot.Skill.Supervisor.start_skill(skills, Bot.Skill.Greeter, [])
-		Bot.Skill.Supervisor.start_skill(skills, Bot.Skill.Name, [])
+		Bot.Skill.Supervisor.enable_skill(skills, Bot.Skill.Greeter, [])
+		Bot.Skill.Supervisor.enable_skill(skills, Bot.Skill.Name, [])
 
-		Bot.Skill.Supervisor.start_skill(skills, Bot.Skill.Slack, ["xoxb-41877287558-bhzZMosiGo6cwr2its3UXsAD", ""])
-		Bot.Skill.Supervisor.start_skill(skills, Bot.Skill.Slack, ["xoxb-31798286241-A1mDAuVSWN39vrfphUg8Bmf6", "C07FCH70A"])
+		Bot.Skill.Supervisor.enable_skill(skills, Bot.Skill.Slack, ["xoxb-41877287558-bhzZMosiGo6cwr2its3UXsAD", ""])
+		Bot.Skill.Supervisor.enable_skill(skills, Bot.Skill.Slack, ["xoxb-31798286241-A1mDAuVSWN39vrfphUg8Bmf6", "C07FCH70A"])
 
-		Bot.Skill.Supervisor.start_skill(skills, Bot.Skill.Reddit.Link, [])
-		Bot.Skill.Supervisor.start_skill(skills, Bot.Skill.Reddit.Poller, ["aww"])
-		Bot.Skill.Supervisor.start_skill(skills, Bot.Skill.Reddit.Poller, ["politics"])
-		Bot.Skill.Supervisor.start_skill(skills, Bot.Skill.Reddit.Poller, ["news"])
+		Bot.Skill.Supervisor.enable_skill(skills, Bot.Skill.Reddit.Link, [])
+		Bot.Skill.Supervisor.enable_skill(skills, Bot.Skill.Reddit.Poller, ["aww"])
+		Bot.Skill.Supervisor.enable_skill(skills, Bot.Skill.Reddit.Poller, ["politics"])
+		Bot.Skill.Supervisor.enable_skill(skills, Bot.Skill.Reddit.Poller, ["news"])
 
 		{:ok, %{
 			key: key,
@@ -83,6 +84,16 @@ defmodule Bot do
 			state |
 			pending: next,
 		}}
+	end
+
+	def enable_skill(pid, module, args) do
+		GenServer.call(pid, {:enable_skill, module, args})
+	end
+
+	def handle_call({:enable_skill, module, args}, _from, state = %{skills: skills}) do
+		IO.puts("Enabling #{module}")
+		Bot.Skill.Supervisor.enable_skill(skills, module, args)
+		{:reply, :ok, state}
 	end
 
 	def wait(pid, context, actions) do
@@ -133,8 +144,7 @@ defmodule Bot.Skill.Supervisor do
 		worker(module, [bot, args])
 	end
 
-	# TODO: Load dynamically
-	def start_skill(sup, module, args) do
+	def enable_skill(sup, module, args) do
 		Supervisor.start_child(sup, worker(module, [self(), args], id: {module, args}))
 	end
 

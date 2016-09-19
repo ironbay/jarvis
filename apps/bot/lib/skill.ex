@@ -20,7 +20,10 @@ defmodule Bot.Skill do
 
 			def handle_info({:start}, state = %{bot: bot, args: args}) do
 				{:ok, data} = __MODULE__.begin(bot, args)
-				Bot.broadcast(bot, "skill.start", __MODULE__)
+				Bot.broadcast(bot, "skill.start", %{
+					module: __MODULE__,
+					args: args,
+				})
 				{:noreply, %{
 					state |
 					data: data,
