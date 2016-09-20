@@ -36,17 +36,20 @@ defmodule Bot do
 		Bot.Skill.Supervisor.enable_skill(skills, Bot.Skill.Controller, [])
 		Bot.Skill.Supervisor.enable_skill(skills, Bot.Skill.Locale, [])
 		Bot.Skill.Supervisor.enable_skill(skills, Bot.Skill.Link, [])
+		Bot.Skill.Supervisor.enable_skill(skills, Bot.Skill.Graph, [])
+		Bot.Skill.Supervisor.enable_skill(skills, Bot.Skill.Alchemy, ["67f1fe52543de6001b8d1cff4e60f2e0d3404e7b"])
 
 		Bot.Skill.Supervisor.enable_skill(skills, Bot.Skill.Greeter, [])
 		Bot.Skill.Supervisor.enable_skill(skills, Bot.Skill.Name, [])
+		Bot.Skill.Supervisor.enable_skill(skills, Bot.Skill.Giphy, [])
 
 		Bot.Skill.Supervisor.enable_skill(skills, Bot.Skill.Slack, ["xoxb-41877287558-bhzZMosiGo6cwr2its3UXsAD", ""])
 		Bot.Skill.Supervisor.enable_skill(skills, Bot.Skill.Slack, ["xoxb-31798286241-A1mDAuVSWN39vrfphUg8Bmf6", "C07FCH70A"])
+		Bot.Skill.Supervisor.enable_skill(skills, Bot.Skill.Slack, ["xoxb-78827137218-mLqPPXHdwT459q30HMsfcTKo", ""])
 
 		Bot.Skill.Supervisor.enable_skill(skills, Bot.Skill.Reddit.Link, [])
-		Bot.Skill.Supervisor.enable_skill(skills, Bot.Skill.Reddit.Poller, ["aww"])
-		Bot.Skill.Supervisor.enable_skill(skills, Bot.Skill.Reddit.Poller, ["politics"])
-		Bot.Skill.Supervisor.enable_skill(skills, Bot.Skill.Reddit.Poller, ["news"])
+		Bot.Skill.Supervisor.enable_skill(skills, Bot.Skill.Reddit.Joke, [])
+		Bot.Skill.Supervisor.enable_skill(skills, Bot.Skill.Reddit.Poller, ["futurology"])
 
 		{:ok, %{
 			key: key,
@@ -78,7 +81,6 @@ defmodule Bot do
 					true
 			end
 		end)
-
 		Bot.Skill.Supervisor.notify(skills, event)
 		{:reply, :ok, %{
 			state |
@@ -91,7 +93,6 @@ defmodule Bot do
 	end
 
 	def handle_call({:enable_skill, module, args}, _from, state = %{skills: skills}) do
-		IO.puts("Enabling #{module}")
 		Bot.Skill.Supervisor.enable_skill(skills, module, args)
 		{:reply, :ok, state}
 	end

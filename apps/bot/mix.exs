@@ -18,7 +18,7 @@ defmodule Bot.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger, :httpoison, :poison, :slack, :syn],
+    [applications: [:logger, :httpoison, :poison, :slack, :syn, :neo4j_sips],
      mod: {Bot.App, []}]
   end
 
@@ -41,7 +41,9 @@ defmodule Bot.Mixfile do
 		{:poison, "~> 2.0"},
 		{:slack, "~> 0.7.0"},
 		{:websocket_client, git: "https://github.com/jeremyong/websocket_client"},
+		{:neo4j_sips, "~> 0.2"},
 		{:syn, "~> 1.5"},
+		{:floki, "~> 0.10.1"},
 	]
   end
 end

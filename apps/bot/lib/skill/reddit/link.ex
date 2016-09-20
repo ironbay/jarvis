@@ -8,9 +8,10 @@ defmodule Bot.Skill.Reddit.Link do
 	end
 
 	def on({"link", %{url: url}, context}, bot, data) do
+		request = "#{@base}/submit.json?#{URI.encode_query([{:url, url}])}"
 		response =
 		# Search reddit for url
-		HTTPoison.get!("#{@base}/submit.json?url=#{url}")
+		HTTPoison.request!(:get, request, "", [], [hackney: [{:follow_redirect, true}]])
 		|> Map.get(:body)
 		|> Poison.decode!(as: %{})
 		|> Kernel.get_in(["data", "children"])
@@ -43,6 +44,11 @@ defmodule Bot.Skill.Reddit.Link do
 
 	defp validate(comment) do
 		true
+	end
+
+	defp print(thing) do
+		IO.inspect(thing)
+		thing
 	end
 
 end

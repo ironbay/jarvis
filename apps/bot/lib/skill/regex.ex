@@ -11,7 +11,7 @@ defmodule Bot.Skill.Regex do
 		{:ok, next}
 	end
 
-	def on({"chat.message", text, context}, bot, data) do
+	def on({"chat.message", %{text: text }, context}, bot, data) do
 		data
 		|> Enum.each(fn({regex, action}) ->
 			case Regex.named_captures(regex, text) do

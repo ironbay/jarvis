@@ -1,5 +1,5 @@
-defmodule Bot.Skill do
+defmodule Bot.Skill.Weather do
 	def begin(bot, args) do
-		{:ok, %{}} 
+		{:ok, %{}}
 	end
 end

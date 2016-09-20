@@ -33,6 +33,7 @@ defmodule Bot.Skill.Slack.Conn do
 
 	def handle_message(message = %{
 		type: "message",
+		ts: key,
 		user: user,
 		text: text,
 		channel: channel,
@@ -41,7 +42,9 @@ defmodule Bot.Skill.Slack.Conn do
 		Process.info(self())
 		|> Access.get(:links)
 		|> Enum.at(0)
-		|> send({:message, text, %{
+		|> send({:message, %{
+			text: text,
+		}, %{
 			type: "slack",
 			sender: user,
 			channel: channel,

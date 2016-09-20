@@ -18,7 +18,6 @@ defmodule Bot.Skill.Locale do
 			nil -> nil
 			{template, type} ->
 				formatted = EEx.eval_string(template, body |> Enum.into([]))
-				IO.inspect(context)
 				Bot.broadcast(bot, type, formatted, context)
 		end
 		{:ok, data}

@@ -39,7 +39,7 @@ defmodule Bot.Skill do
 					rescue
 						e in FunctionClauseError -> :ok
 						e in UndefinedFunctionError -> :ok
-						e -> IO.inspect(e)
+						e -> IO.puts("Error in #{__MODULE__}: #{inspect(e)}")
 					end
 				end)
 				pending
