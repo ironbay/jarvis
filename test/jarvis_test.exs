@@ -1,6 +1,6 @@
-defmodule BotTest do
+defmodule JarvisTest do
   use ExUnit.Case
-  doctest Bot
+  doctest Jarvis
 
   test "the truth" do
     assert 1 + 1 == 2

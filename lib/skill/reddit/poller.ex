@@ -1,10 +1,10 @@
-defmodule Bot.Skill.Reddit.Poller do
+defmodule Jarvis.Reddit.Poller do
 	use Bot.Skill
 	@interval 1 * 1000 * 60 * 5
 	@base "https://www.reddit.com"
 
 	def begin(bot, [subreddit]) do
-		Bot.broadcast(bot, "locale.broadcast", {"reddit.link", "<%= title %> - <%= url %>"})
+		Bot.cast(bot, "locale.broadcast", {"reddit.link", "<%= title %> - <%= url %>"})
 		%{id: id} = get_post(subreddit)
 		schedule(@interval)
 		{:ok, %{
@@ -20,7 +20,7 @@ defmodule Bot.Skill.Reddit.Poller do
 	def handle_info({:poll}, state = %{bot: bot, data: %{subreddit: subreddit, last: last}}) do
 		post = %{id: id} = get_post(subreddit)
 		if last != id do
-			Bot.broadcast(bot, "reddit.link", post)
+			Bot.cast(bot, "reddit.link", post)
 		end
 		schedule(@interval)
 		{:noreply, Kernel.put_in(state, [:data, :last], id)}

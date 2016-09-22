@@ -1,4 +1,4 @@
-defmodule Bot.Skill.Reddit.Link do
+defmodule Jarvis.Reddit.Link do
 	use Bot.Skill
 
 	@base "https://www.reddit.com"
@@ -28,9 +28,9 @@ defmodule Bot.Skill.Reddit.Link do
 		|> Stream.map(&Kernel.get_in(&1, ["data", "body"]))
 		# Filter out deleted comments
 		|> Stream.filter(&validate(&1))
-		|> Stream.take(1)
-		|> Enum.at(0)
-		Bot.broadcast(bot, "chat.response", response, context)
+		|> Stream.take(5)
+		|> Enum.random
+		Bot.cast(bot, "chat.response", response, context)
 		{:ok, data}
 	end
 
@@ -43,7 +43,7 @@ defmodule Bot.Skill.Reddit.Link do
 	end
 
 	defp validate(comment) do
-		true
+		String.length(comment) < 300
 	end
 
 	defp print(thing) do

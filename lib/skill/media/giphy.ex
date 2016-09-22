@@ -1,10 +1,10 @@
-defmodule Bot.Skill.Giphy do
+defmodule Jarvis.Media.Giphy do
 	use Bot.Skill
 	@base "http://api.giphy.com/"
 
 	def begin(bot, args) do
-		Bot.broadcast(bot, "regex.add", {"^gif (?P<query>.+)", "giphy.search"})
-		Bot.broadcast(bot, "locale.add", {"bot.gif", "<%= url %>"})
+		Bot.cast(bot, "regex.add", {"^gif (?P<query>.+)", "giphy.search"})
+		Bot.cast(bot, "locale.add", {"bot.gif", "<%= url %>"})
 		{:ok, %{}}
 	end
 
@@ -15,7 +15,7 @@ defmodule Bot.Skill.Giphy do
 		|> Kernel.get_in(["data"])
 		|> Enum.at(0)
 		|> Map.get("url")
-		Bot.broadcast(bot, "bot.gif", %{
+		Bot.cast(bot, "bot.gif", %{
 			url: url,
 		}, context)
 		{:ok, data}
