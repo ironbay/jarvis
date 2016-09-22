@@ -17,7 +17,6 @@ defmodule Jarvis do
 		Bot.enable_skill(bot, Bot.Skill.Controller, [])
 		Bot.enable_skill(bot, Bot.Skill.Locale, [])
 		Bot.enable_skill(bot, Bot.Skill.Link, [])
-		Bot.enable_skill(bot, Bot.Skill.Graph, [])
 
 
 		Bot.enable_skill(bot, Bot.Skill.Joke, [])
@@ -34,7 +33,8 @@ defmodule Jarvis do
 		Bot.enable_skill(bot, Jarvis.Reddit.Poller, ["futurology"])
 
 		Bot.enable_skill(bot, Bot.Skill.Alchemy, ["67f1fe52543de6001b8d1cff4e60f2e0d3404e7b"])
-		Bot.enable_skill(bot, Jarvis.Wolframe, ["99AK9Y-RQEX2UU3GT"])
+		Bot.enable_skill(bot, Jarvis.Wolfram, ["99AK9Y-RQEX2UU3GT"])
+		Bot.enable_skill(bot, Jarvis.Graph, [])
 
 		# See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
 		# for other strategies and supported options

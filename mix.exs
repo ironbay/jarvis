@@ -14,7 +14,8 @@ defmodule Jarvis.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger, :bot], mod: {Jarvis, []}]
+    [applications: [:logger, :bot, :neo4j_sips, :sweet_xml],
+	mod: {Jarvis, []}]
   end
 
   # Dependencies can be Hex packages:
@@ -28,7 +29,9 @@ defmodule Jarvis.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
-		{:bot, git: "~/dev/ironbay/bot"}
+		{:bot, git: "~/dev/ironbay/bot"},
+		{:exirc, "~> 0.11.0"},
+		{:neo4j_sips, "~> 0.2"},
 	]
   end
 end
