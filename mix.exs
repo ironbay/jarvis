@@ -14,7 +14,7 @@ defmodule Jarvis.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger, :bot, :neo4j_sips, :sweet_xml],
+    [applications: [:logger, :bot, :neo4j_sips, :sweet_xml, :exirc],
 	mod: {Jarvis, []}]
   end
 

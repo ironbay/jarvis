@@ -14,6 +14,7 @@ defmodule Jarvis.Reddit.Link do
 		HTTPoison.request!(:get, request, "", [], [hackney: [{:follow_redirect, true}]])
 		|> Map.get(:body)
 		|> Poison.decode!(as: %{})
+		|> extract
 		|> Kernel.get_in(["data", "children"])
 		|> Enum.at(0)
 		|> Kernel.get_in(["data", "permalink"])
@@ -49,6 +50,15 @@ defmodule Jarvis.Reddit.Link do
 	defp print(thing) do
 		IO.inspect(thing)
 		thing
+	end
+
+	defp extract(thing) do
+		IO.inspect(is_list(thing))
+		cond do
+			is_list(thing) ->
+				Enum.at(thing, 0)
+			true -> thing
+		end
 	end
 
 end
