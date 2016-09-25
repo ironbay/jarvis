@@ -1,3 +1,4 @@
 FROM ironbay/elixir:master
 ADD . .
-RUN iex -S mix
+
+CMD iex -S mix
