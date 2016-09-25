@@ -2,7 +2,7 @@ defmodule Jarvis.Media.TL do
 	use Bot.Skill
 	@server "irc.torrentleech.org"
 	@port 7011
-	@nick "jarvis"
+	@nick "jarvis2"
 	#
 	# @server "chat.freenode.net"
 	# @port 6667

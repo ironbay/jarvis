@@ -12,7 +12,7 @@ defmodule Jarvis do
 			# worker(Bot, ["jarvis"]),
 		]
 
-		{:ok, bot} = Bot.start_link("jarvis")
+		{:ok, bot} = Bot.start_link(:jarvis)
 		Bot.enable_skill(bot, Bot.Skill.Regex, [])
 		Bot.enable_skill(bot, Bot.Skill.Controller, [])
 		Bot.enable_skill(bot, Bot.Skill.Locale, [])
