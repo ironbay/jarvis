@@ -36,6 +36,7 @@ defmodule Jarvis do
 		Bot.enable_skill(bot, Jarvis.Graph, [])
 
 		Bot.enable_skill(bot, Jarvis.Media.TL, [])
+		Bot.enable_skill(bot, Jarvis.Media.Download, [])
 		Bot.enable_skill(bot, Bot.Skill.Giphy, [])
 		# See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
 		# for other strategies and supported options

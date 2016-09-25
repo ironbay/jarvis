@@ -14,7 +14,7 @@ defmodule Jarvis.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger, :bot, :neo4j_sips, :sweet_xml, :exirc],
+    [applications: [:logger, :bot, :neo4j_sips, :sweet_xml, :exirc, :httpoison],
 	mod: {Jarvis, []}]
   end
 
@@ -29,6 +29,7 @@ defmodule Jarvis.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
+		{:httpoison, "~> 0.8.0"},
 		{:bot, git: "https://github.com/ironbay/bot.git"},
 		{:sweet_xml, "~> 0.6.1"},
 		{:exirc, "~> 0.11.0"},

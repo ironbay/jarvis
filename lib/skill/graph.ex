@@ -11,7 +11,7 @@ defmodule Jarvis.Graph do
 		}}
 	end
 
-	def on({"link.direct", %{url: url }, context}, bot, data= %{neo: neo}) do
+	def on({"link.direct", %{url: url}, %{sender: sender, type: type, channel: channel}}, bot, data= %{neo: neo}) do
 		cypher = """
 			MERGE (source:Source { key: {source}.type + "-" + {source}.sender })
 			ON CREATE SET source.user = {source}.sender, source.type = {source}.type
@@ -24,7 +24,11 @@ defmodule Jarvis.Graph do
 			SET r.created = TIMESTAMP()
 		"""
 		{:ok, _ } = Neo4j.Sips.query(Neo4j.Sips.conn, cypher, %{
-			source: context,
+			source: %{
+				sender: sender,
+				type: type,
+				channel: channel
+			},
 			url: url,
 		})
 		{:ok, data}

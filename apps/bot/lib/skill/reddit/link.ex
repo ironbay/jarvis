@@ -1,4 +1,4 @@
-defmodule Jarvis.Reddit.Link do
+defmodule Bot.Skill.Reddit.Link do
 	use Bot.Skill
 
 	@base "https://www.reddit.com"
@@ -7,14 +7,13 @@ defmodule Jarvis.Reddit.Link do
 		{:ok, %{}}
 	end
 
-	def on({"link.direct", %{url: url}, context}, bot, data) do
+	def on({"link", %{url: url}, context}, bot, data) do
 		request = "#{@base}/submit.json?#{URI.encode_query([{:url, url}])}"
 		response =
 		# Search reddit for url
 		HTTPoison.request!(:get, request, "", [], [hackney: [{:follow_redirect, true}]])
 		|> Map.get(:body)
 		|> Poison.decode!(as: %{})
-		|> extract
 		|> Kernel.get_in(["data", "children"])
 		|> Enum.at(0)
 		|> Kernel.get_in(["data", "permalink"])
@@ -31,7 +30,7 @@ defmodule Jarvis.Reddit.Link do
 		|> Stream.filter(&validate(&1))
 		|> Stream.take(5)
 		|> Enum.random
-		Bot.cast(bot, "bot.message", response, context)
+		Bot.broadcast(bot, "bot.message", response, context)
 		{:ok, data}
 	end
 
@@ -45,14 +44,6 @@ defmodule Jarvis.Reddit.Link do
 
 	defp validate(comment) do
 		String.length(comment) < 300
-	end
-
-	defp extract(thing) do
-		cond do
-			is_list(thing) ->
-				Enum.at(thing, 0)
-			true -> thing
-		end
 	end
 
 end
