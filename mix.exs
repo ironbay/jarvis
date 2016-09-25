@@ -30,6 +30,7 @@ defmodule Jarvis.Mixfile do
   defp deps do
     [
 		{:bot, git: "https://github.com/ironbay/bot.git"},
+		{:sweet_xml, "~> 0.6.1"},
 		{:exirc, "~> 0.11.0"},
 		{:neo4j_sips, "~> 0.2"},
 	]
