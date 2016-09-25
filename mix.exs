@@ -29,7 +29,7 @@ defmodule Jarvis.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
-		{:bot, git: "~/dev/ironbay/bot"},
+		{:bot, git: "https://github.com/ironbay/bot.git"},
 		{:exirc, "~> 0.11.0"},
 		{:neo4j_sips, "~> 0.2"},
 	]
