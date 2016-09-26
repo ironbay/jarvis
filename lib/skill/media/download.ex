@@ -15,6 +15,7 @@ defmodule Jarvis.Media.Download do
 		|> Enum.take(1) do
 			[] -> :skip
 			_ ->
+				IO.puts("Downloading #{name}")
 				body =
 					"https://www.torrentleech.org/rss/download/#{id}/#{@key}/#{name}"
 					|> HTTPoison.get!
