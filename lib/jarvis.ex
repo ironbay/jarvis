@@ -24,7 +24,7 @@ defmodule Jarvis do
 		Bot.enable_skill(bot, Bot.Skill.Name, [])
 
 		Bot.enable_skill(bot, Bot.Skill.Slack, ["xoxb-41877287558-cGirzU5NfvqvswVrtZlUhBu8", ""])
-		Bot.enable_skill(bot, Bot.Skill.Slack, ["xoxb-31798286241-HxuRQtrAPBwmKYx7oK6DEr51", "C07FCH70A"])
+		Bot.enable_skill(bot, Bot.Skill.Slack, ["xoxb-31798286241-HxuRQtrAPBwmKYx7oK6DEr51", ""])
 		Bot.enable_skill(bot, Bot.Skill.Slack, ["xoxb-78827137218-d6p8XDm72geFq4ne4SBloDkl", ""])
 
 		Bot.enable_skill(bot, Jarvis.Reddit.Link, [])

@@ -17,25 +17,25 @@ defmodule Jarvis.Media.TL do
 		}}
 	end
 
-	def handle_info({:connected, _server, _port}, state = %{data: %{client: client}}) do
+	def handle_info({:connected, _server, _port}, _bot, data = %{client: client}) do
 		ExIrc.Client.logon(client, "", @nick, @nick, @nick)
-		{:noreply, state}
+		:ok
 	end
 
-	def handle_info(:logged_in, state = %{data: %{client: client}}) do
+	def handle_info(:logged_in, _bot, data = %{client: client}) do
 		ExIrc.Client.join(client, "#tlannounces")
-		{:noreply, state}
+		:ok
 	end
 
-	def handle_info({:received, data, _sender, _channel}, state = %{bot: bot, data: %{client: client}}) do
+	def handle_info({:received, data, _sender, _channel}, bot, state = %{client: client}) do
 		text = String.Chars.to_string(data)
 		Bot.cast(bot, "chat.message", %{
 			text: text
 		})
-		{:noreply, state}
+		:ok
 	end
 
-	def handle_info(msg, state) do
-		{:noreply, state}
+	def handle_info(msg, bot, state) do
+		:ok
 	end
 end

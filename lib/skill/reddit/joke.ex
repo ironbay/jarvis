@@ -8,7 +8,7 @@ defmodule Jarvis.Reddit.Joke do
 		{:ok, %{}}
 	end
 
-	def on({"joke.search", _body, context}, bot, data) do
+	def handle_cast({"joke.search", _body, context}, bot, data) do
 		{question, answer} = HTTPoison.get!("#{@base}/r/dadjokes.json")
 		|> Map.get(:body)
 		|> Poison.decode!(as: %{})

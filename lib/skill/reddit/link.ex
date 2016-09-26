@@ -7,7 +7,7 @@ defmodule Jarvis.Reddit.Link do
 		{:ok, %{}}
 	end
 
-	def on({"link.direct", %{url: url}, context}, bot, data) do
+	def handle_cast({"link.direct", %{url: url}, context}, bot, data) do
 		request = "#{@base}/submit.json?#{URI.encode_query([{:url, url}])}"
 		response =
 		# Search reddit for url

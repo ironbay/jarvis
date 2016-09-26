@@ -8,7 +8,7 @@ defmodule Jarvis.Media.Download do
 		{:ok, %{}}
 	end
 
-	def on({"torrent.upload", %{name: name, category: "TV :: Episodes HD", id: id}, _context}, bot, data) do
+	def handle_cast({"torrent.upload", %{name: name, category: "TV :: Episodes HD", id: id}, _context}, bot, data) do
 		lower =
 			name
 			|> String.downcase

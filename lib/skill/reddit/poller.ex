@@ -17,7 +17,7 @@ defmodule Jarvis.Reddit.Poller do
 		Process.send_after(self(), {:poll}, interval)
 	end
 
-	def handle_info({:poll}, state = %{bot: bot, data: %{subreddit: subreddit, last: last}}) do
+	def handle_info({:poll}, bot, state = %{subreddit: subreddit, last: last}) do
 		post = %{id: id} = get_post(subreddit)
 		if last != id do
 			Bot.cast(bot, "reddit.link", post)
