@@ -20,6 +20,7 @@ defmodule Jarvis.Media.Download do
 			_ ->
 				body =
 					"https://www.torrentleech.org/rss/download/#{id}/#{@key}/#{name}"
+					|> IO.inspect
 					|> HTTPoison.get!
 					|> Map.get(:body)
 				File.write!("#{@path}/#{name}.torrent", body)

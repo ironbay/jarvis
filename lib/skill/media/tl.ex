@@ -36,7 +36,6 @@ defmodule Jarvis.Media.TL do
 	end
 
 	def handle_info(msg, state) do
-		IO.inspect(msg)
 		{:noreply, state}
 	end
 end
