@@ -34,10 +34,15 @@ defmodule Jarvis do
 		Bot.enable_skill(bot, Jarvis.Wolfram, ["99AK9Y-RQEX2UU3GT"])
 		Bot.enable_skill(bot, Jarvis.Graph, [])
 
+		# Torrent
 		Bot.enable_skill(bot, Jarvis.Media.TL, [])
 		Bot.enable_skill(bot, Jarvis.Media.Download, [])
+
+		# Video
 		Bot.enable_skill(bot, Jarvis.Media.Video, [])
-		Bot.enable_skill(bot, Jarvis.Media.Youtube, ["UCWrmUNZB9-p6zgNhwNlEcyw"])
+		Bot.enable_skill(bot, Jarvis.Media.Youtube, ["channel/UCWrmUNZB9-p6zgNhwNlEcyw"])
+		Bot.enable_skill(bot, Jarvis.Media.Youtube, ["user/taimur38"])
+
 		Bot.enable_skill(bot, Bot.Skill.Giphy, [])
 		# See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
 		# for other strategies and supported options
