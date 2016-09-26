@@ -9,13 +9,15 @@ defmodule Jarvis.Media.Download do
 	end
 
 	def on({"torrent.upload", %{name: name, category: "TV :: Episodes HD", id: id}, _context}, bot, data) do
-		lower = String.downcase(name)
+		lower =
+			name
+			|> String.downcase
+			|> String.replace(" ", ".")
 		case File.ls!(@tv)
 		|> Stream.filter(&String.contains?(lower, &1))
 		|> Enum.take(1) do
 			[] -> :skip
 			_ ->
-				IO.puts("Downloading #{name}")
 				body =
 					"https://www.torrentleech.org/rss/download/#{id}/#{@key}/#{name}"
 					|> HTTPoison.get!
