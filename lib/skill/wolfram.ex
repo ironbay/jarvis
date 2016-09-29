@@ -19,6 +19,6 @@ defmodule Jarvis.Wolfram do
 		if response != "" do
 			Bot.cast(bot, "chat.response", response, context)
 		end
-		{:ok, data}
+		:ok
 	end
 end

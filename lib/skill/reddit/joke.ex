@@ -4,7 +4,7 @@ defmodule Jarvis.Reddit.Joke do
 
 	def begin(bot, []) do
 		Bot.cast(bot, "regex.add", {"tell me a joke$", "joke.search"})
-		Bot.cast(bot, "regex.add", {"^(how|why|what)$", "joke.answer"})
+		Bot.cast(bot, "regex.add", {"^(who|what|when|where|why|how)$", "joke.answer"})
 		{:ok, %{}}
 	end
 
@@ -20,13 +20,13 @@ defmodule Jarvis.Reddit.Joke do
 		|> Enum.random
 		cond do
 			String.ends_with?(question, "?") ->
-				Bot.cast(bot, "chat.response", question, context)
+				Bot.cast(bot, "bot.message", question, context)
 				Bot.wait(bot, context, ["joke.answer"])
-				Bot.cast(bot, "chat.response", answer, context)
+				Bot.cast(bot, "bot.message", answer, context)
 			true ->
-				Bot.cast(bot, "chat.response", "#{question} #{answer}", context)
+				Bot.cast(bot, "bot.message", "#{question} #{answer}", context)
 		end
-		{:ok, data}
+		:ok
 	end
 
 end

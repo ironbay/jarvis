@@ -25,10 +25,4 @@ defmodule Jarvis.Media.Youtube do
 		:ok
 	end
 
-	def handle_cast({"link.direct", %{url: url}, context}, bot, data) do
-		if String.starts_with?(url, "https://www.youtube.com") do
-			Bot.cast(bot, "video", %{type: "youtube", url: url}, context)
-		end
-		:ok
-	end
 end

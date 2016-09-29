@@ -23,7 +23,7 @@ defmodule Jarvis.Reddit.Poller do
 			Bot.cast(bot, "reddit.link", post)
 		end
 		schedule(@interval)
-		{:noreply, Kernel.put_in(state, [:data, :last], id)}
+		{:ok, Kernel.put_in(state, [:data, :last], id)}
 	end
 
 	def get_post(subreddit) do

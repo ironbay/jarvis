@@ -32,7 +32,7 @@ defmodule Jarvis.Reddit.Link do
 		|> Stream.take(5)
 		|> Enum.random
 		Bot.cast(bot, "bot.message", response, context)
-		{:ok, data}
+		:ok
 	end
 
 	defp comment_url(permalink) do
