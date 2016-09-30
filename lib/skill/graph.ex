@@ -11,42 +11,51 @@ defmodule Jarvis.Graph do
 		}}
 	end
 
-	def on({"link.direct", %{url: url}, %{sender: sender, type: type, channel: channel}}, bot, data= %{neo: neo}) do
+	def handle_call({"graph.node", body, _context}, bot, data = %{neo: neo}) do
+		{key, props} = node(body)
 		cypher = """
-			MERGE (source:Source { key: {source}.type + "-" + {source}.sender })
-			ON CREATE SET source.user = {source}.sender, source.type = {source}.type
-
-			MERGE (channel:Channel { key: {source}.channel })
-
-			MERGE (link:Link { url: {url} })
-			MERGE (source)-[r:DID_SEND]->(message:Message)-[:HAS_LINK]->(link)
-			MERGE (message)-[:IN_CHANNEL]->(channel)
-			SET r.created = TIMESTAMP()
+			MERGE (node:Node { key: {key} })
+			SET node += {props}
 		"""
-		{:ok, _ } = Neo4j.Sips.query(Neo4j.Sips.conn, cypher, %{
-			source: %{
-				sender: sender,
-				type: type,
-				channel: channel
-			},
-			url: url,
+		Neo4j.Sips.query(Neo4j.Sips.conn, cypher, %{
+			key: key,
+			props: props,
 		})
-		{:ok, data}
+		:ok
 	end
 
-	def on({"link.tags", %{url: url, tags: tags }, context}, bot, data= %{neo: neo}) do
+	def handle_call({"graph.triple", body = %{a: a, b: b, edge: edge}, _context}, bot, data = %{neo: neo}) do
+		{a_key, a_props} = build(a)
+		{b_key, b_props} = build(b)
 		cypher = """
-			MERGE (link:Link { url: {url} })
-			WITH link
-			UNWIND {tags} as value
-			MERGE (tag:Tag { value: value })
-			MERGE (link)-[:HAS_TAG]->(tag)
+			MERGE (a:Node { key: {a_key} })
+			ON CREATE SET a += {a_props}
+
+			MERGE (b:Node { key: {b_key} })
+			ON CREATE SET b += {b_props}
+
+			MERGE (a)-[r:#{edge}]->(b)
+			SET r.created = TIMESTAMP()
 		"""
-		{:ok, _ } = Neo4j.Sips.query(Neo4j.Sips.conn, cypher, %{
-			tags: tags,
-			url: url,
+		{:ok, _} = Neo4j.Sips.query(Neo4j.Sips.conn, cypher, %{
+			a_key: a_key,
+			b_key: b_key,
+			a_props: a_props,
+			b_props: b_props,
 		})
-		{:ok, data}
+		:ok
+	end
+
+	def build(input = %{props: nil}) do
+		build(Map.put(input, :props, %{}))
+	end
+
+	def build(%{props: props, type: type, token: token}) do
+		key = "#{type}-#{token}"
+		{key,
+			props
+			|> Map.put(:type, type)
+		}
 	end
 
 end
