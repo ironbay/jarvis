@@ -2,7 +2,7 @@ defmodule Jarvis.Media do
 	use Bot.Skill
 
 	def begin(bot, args) do
-		Bot.cast(bot, "regex.add", {"show me a (?P<type>.+)", "media.search"})
+		Bot.cast(bot, "regex.add", {"show me (a|an) (?P<type>.+)", "media.search"})
 		# Bot.cast(bot, "locale.add", {"graph", "This <%= type %> is lit"})
 		Bot.cast(bot, "locale.add", {"media.result", "<%= url %>"})
 		{:ok, %{
@@ -16,17 +16,19 @@ defmodule Jarvis.Media do
 	end
 
 	def handle_cast({"media.search", body = %{type: type}, context}, bot, data) do
-		{_, result} = data
-		|> Map.get(translate(type))
-		|> Enum.random
+		cypher = """
+			MATCH (node:Node { type: {type} })
+			RETURN node
+		"""
+		{:ok, data} = Neo4j.Sips.query(Neo4j.Sips.conn, cypher, %{
+			type: type
+		})
+		result =
+			data
+			|> Enum.random
+			|> Map.get("node")
+		result = for {key, val} <- result, into: %{}, do: {String.to_atom(key), val}
 		Bot.cast(bot, "media.result", result, context)
 		:ok
-	end
-
-	defp translate(type) do
-		case type do
-			"song" -> "music.song"
-			_ -> type
-		end
 	end
 end
