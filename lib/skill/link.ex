@@ -46,6 +46,7 @@ defmodule Jarvis.Link do
 
 	def handle_cast_async({"link.tags", %{url: url, tags: tags }, _context}, bot, _data) do
 		Enum.each(tags, fn(tag) ->
+			tag = String.downcase(tag)
 			Bot.call(bot, "graph.triple", %{
 				a: %{
 					type: "link",
