@@ -9,9 +9,25 @@ defmodule Jarvis do
 		# Define workers and child supervisors to be supervised
 		children = [
 			# Starts a worker by calling: Bot.Worker.start_link(arg1, arg2, arg3)
-			# worker(Bot, ["jarvis"]),
+			worker(Jarvis.Proxy, []),
 		]
 
+
+		# See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
+		# for other strategies and supported options
+		opts = [strategy: :one_for_one, name: Jarvis]
+		Supervisor.start_link(children, opts)
+	end
+end
+
+defmodule Jarvis.Proxy do
+	use GenServer
+
+	def start_link do
+		GenServer.start_link(__MODULE__, [])
+	end
+
+	def init(_) do
 		{:ok, bot} = Bot.start_link(:jarvis)
 
 		# Core
@@ -50,9 +66,6 @@ defmodule Jarvis do
 		# Bot.enable_skill(bot, Jarvis.Media.Youtube, ["user/taimur38"])
 
 		Bot.enable_skill(bot, Bot.Skill.Giphy, [])
-		# See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
-		# for other strategies and supported options
-		opts = [strategy: :one_for_one, name: Jarvis]
-		Supervisor.start_link(children, opts)
+		{:ok, []}
 	end
 end
