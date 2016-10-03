@@ -8,7 +8,7 @@ defmodule Jarvis.Media.Download do
 
 	def begin(bot, args) do
 		Bot.cast(bot, "regex.add", {"^download (?P<query>.+)", "torrent.search"})
-		Bot.cast(bot, "regex.add", {"^(?P<index>\d+)$", "chat.index"})
+		Bot.cast(bot, "regex.add", {"^(?P<index>\\d+)$", "chat.index"})
 		{:ok, %{}}
 	end
 
