@@ -1,5 +1,6 @@
 defmodule Jarvis.Media.Download do
 	use Bot.Skill
+	@wait 1000 * 30
 	@key "c7afa073572a4ee09f8c"
 	@tv "/media/content/union/tv"
 	@downloaded "/media/torrents/downloaded"
@@ -20,7 +21,9 @@ defmodule Jarvis.Media.Download do
 		|> Stream.filter(&String.contains?(lower, &1))
 		|> Enum.take(1) do
 			[] -> :skip
-			_ -> Bot.call(bot, "torrent.download", %{id: id, name: name})
+			_ ->
+				:timer.sleep(@wait)
+				Bot.call(bot, "torrent.download", %{id: id, name: name})
 		end
 		:ok
 	end
