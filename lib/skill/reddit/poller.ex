@@ -17,13 +17,13 @@ defmodule Jarvis.Reddit.Poller do
 		Process.send_after(self(), {:poll}, interval)
 	end
 
-	def handle_info({:poll}, bot, state = %{subreddit: subreddit, last: last}) do
+	def handle_info({:poll}, bot, data = %{subreddit: subreddit, last: last}) do
 		post = %{id: id} = get_post(subreddit)
 		if last != id do
 			Bot.cast(bot, "reddit.link", post)
 		end
 		schedule(@interval)
-		{:ok, Kernel.put_in(state, [:data, :last], id)}
+		{:ok, Map.put(data, :last, id)}
 	end
 
 	def get_post(subreddit) do
