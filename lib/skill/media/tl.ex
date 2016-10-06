@@ -3,12 +3,12 @@ defmodule Jarvis.Media.TL do
 	@server "irc.torrentleech.org"
 	@port 7011
 	@nick "jarvis"
+	@regex Regex.compile("\\<(?P<category>.+)\\> Name:'(?P<name>[^']+)'.+http[^\\d]+(?P<id>\\d+)")
 	#
 	# @server "chat.freenode.net"
 	# @port 6667
 
 	def begin(bot, []) do
-		Bot.cast(bot, "regex.add", {"\\<(?P<category>.+)\\> Name:'(?P<name>[^']+)'.+http[^\\d]+(?P<id>\\d+)", "torrent.upload"})
 		{:ok, client} = ExIrc.start_client!()
 		ExIrc.Client.add_handler(client, self)
 		ExIrc.Client.connect!(client, @server, @port)
@@ -29,6 +29,12 @@ defmodule Jarvis.Media.TL do
 
 	def handle_info({:received, data, _sender, _channel}, bot, state = %{client: client}) do
 		text = String.Chars.to_string(data)
+		case Regex.named_captures(@regex, text) do
+			nil -> :ok
+			data ->
+				parsed = for {key, val} <- data, into: %{}, do: {String.to_atom(key), val}
+				Bot.cast(bot, "torrent.upload", parsed |> Map.put(:raw, text))
+		end
 		Bot.cast(bot, "chat.message", %{
 			text: text
 		})
