@@ -7,39 +7,53 @@ defmodule Jarvis.Link do
 
 	def handle_cast_async({"link.direct", %{url: url}, %{sender: sender, type: type, channel: channel}}, bot, _data) do
 		Bot.call(bot, "graph.triple", %{
-			a: %{
-				type: "source",
-				token: "#{type}-#{sender}",
-				props: %{
-					sender: sender,
-					account: type,
-				}
+			nodes: %{
+				link: %{
+					type: "link",
+					token: url,
+				},
+				sender: %{
+					type: "source",
+					token: "#{type}/#{sender}"
+				},
+				# channel: %{
+				# 	type: "channel",
+				# 	token: "#{type}/#{channel}",
+				# },
 			},
-			b: %{
-				type: "link",
-				token: url,
-				props: %{
-					url: url
-				}
-			},
-			edge: "DID_SHARE"
+			edges: [
+				[:sender, "DID_SHARE", :link],
+				# [:channel, "HAS_LINK", :link],
+			]
 		})
 		:ok
 	end
 
 	def handle_cast_async({"graph", body = %{type: type, url: url}, _context}, bot, _data) do
 		Bot.call(bot, "graph.triple", %{
-			a: %{
-				type: "link",
-				token: url,
-				props: %{},
+			nodes: %{
+				link: %{
+					type: "link",
+					token: url,
+				},
+				item: %{
+					type: type,
+					token: url,
+				},
+				image: %{
+					type: "image",
+					token: body.image,
+				},
+				title: %{
+					type: "title",
+					token: body.image,
+				},
 			},
-			b: %{
-				type: type,
-				token: url,
-				props: body,
-			},
-			edge: "IS"
+			edges: [
+				[:link, "IS", :item],
+				[:item, "HAS_IMAGE", :image],
+				[:item, "HAS_TITLE", :title],
+			]
 		})
 		:ok
 	end
@@ -48,19 +62,19 @@ defmodule Jarvis.Link do
 		Enum.each(tags, fn(tag) ->
 			tag = String.downcase(tag)
 			Bot.call(bot, "graph.triple", %{
-				a: %{
-					type: "link",
-					token: url,
-					props: %{},
-				},
-				b: %{
-					type: "tag",
-					token: tag,
-					props: %{
-						value: tag
+				nodes: %{
+					link: %{
+						type: "link",
+						token: url,
+					},
+					tag: %{
+						type: "tag",
+						token: tag,
 					},
 				},
-				edge: "HAS_TAG"
+				edges: [
+					[:link, "HAS_TAG", :tag]
+				]
 			})
 		end)
 		:ok

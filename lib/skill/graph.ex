@@ -11,51 +11,45 @@ defmodule Jarvis.Graph do
 		}}
 	end
 
-	def handle_call({"graph.node", body, _context}, bot, data = %{neo: neo}) do
-		{key, props} = node(body)
+	def handle_call({"graph.node", node, _context}, bot, data = %{neo: neo}) do
 		cypher = """
-			MERGE (node:Node { key: {key} })
-			SET node += {props}
+			MERGE (node:Node { key: {node}.key} })
+			ON CREATE SET node.props += {node}, node.created = TIMESTAMP()
 		"""
 		Neo4j.Sips.query(Neo4j.Sips.conn, cypher, %{
-			key: key,
-			props: props,
+			node: build(node)
 		})
 		:ok
 	end
 
-	def handle_call({"graph.triple", body = %{a: a, b: b, edge: edge}, _context}, bot, data = %{neo: neo}) do
-		{a_key, a_props} = build(a)
-		{b_key, b_props} = build(b)
-		cypher = """
-			MERGE (a:Node { key: {a_key} })
-			ON CREATE SET a += {a_props}
-
-			MERGE (b:Node { key: {b_key} })
-			ON CREATE SET b += {b_props}
-
-			MERGE (a)-[r:#{edge}]->(b)
-			SET r.created = TIMESTAMP()
-		"""
-		{:ok, _} = Neo4j.Sips.query(Neo4j.Sips.conn, cypher, %{
-			a_key: a_key,
-			b_key: b_key,
-			a_props: a_props,
-			b_props: b_props,
-		})
+	def handle_call({"graph.triple", body = %{nodes: nodes, edges: edges}, _context}, bot, data = %{neo: neo}) do
+		params =
+			nodes
+			|> Enum.map(fn {key, node} -> {key, build(node)} end)
+			|> Enum.into(%{})
+		create_nodes =
+			nodes
+			|> Enum.map(fn {key, node} ->
+				"""
+					MERGE (#{key}:Node { key: {#{key}}.key })
+					ON CREATE SET #{key} += {#{key}}, #{key}.created = TIMESTAMP()
+				"""
+			end)
+			|> Enum.join("\n")
+		create_edges =
+			edges
+			|> Enum.map(fn [subject, pred, object] ->
+				"""
+					MERGE (#{subject})-[:#{pred}]->(#{object})
+				"""
+			end)
+			|> Enum.join("\n")
+		cypher = Enum.join([create_nodes, create_edges], "\n")
+		Neo4j.Sips.query(Neo4j.Sips.conn, cypher, params)
 		:ok
 	end
 
-	def build(input = %{props: nil}) do
-		build(Map.put(input, :props, %{}))
+	def build(node = %{type: type, token: token}) do
+		Map.put(node, :key, "#{type}-#{token}")
 	end
-
-	def build(%{props: props, type: type, token: token}) do
-		key = "#{type}-#{token}"
-		{key,
-			props
-			|> Map.put(:type, type)
-		}
-	end
-
 end

@@ -42,6 +42,7 @@ defmodule Jarvis.Media.TL do
 	end
 
 	def handle_info(msg, bot, state) do
+		IO.inspect(msg)
 		:ok
 	end
 end
