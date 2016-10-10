@@ -46,7 +46,7 @@ defmodule Jarvis.Link do
 				},
 				title: %{
 					type: "title",
-					token: body.image,
+					token: body.title,
 				},
 			},
 			edges: [
