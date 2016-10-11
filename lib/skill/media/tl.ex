@@ -41,6 +41,11 @@ defmodule Jarvis.Media.TL do
 		:ok
 	end
 
+	def handle_info(:disconnected, bot, state = %{client: client}) do
+		IO.puts("OMG")
+		:stop
+	end
+
 	def handle_info(msg, bot, state) do
 		IO.inspect(msg)
 		:ok
