@@ -44,7 +44,7 @@ defmodule Jarvis.Media.Download do
 			_ ->
 				message =
 					options
-					|> Stream.map(fn({item, index}) -> format(index, item) end)
+					|> Stream.map(fn {item, index} -> format(index, item) end)
 					|> Enum.join("\n")
 				Bot.cast(bot, "bot.message", "Which one?", context)
 				Bot.cast(bot, "bot.message", message, context)
