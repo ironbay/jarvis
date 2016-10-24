@@ -42,8 +42,9 @@ defmodule Jarvis.Proxy do
 		Bot.enable_skill(bot, Bot.Skill.Name, [])
 
 		# Slack
-		Bot.enable_skill(bot, Bot.Skill.Slack, ["xoxb-41877287558-cGirzU5NfvqvswVrtZlUhBu8", ""])
-		Bot.enable_skill(bot, Bot.Skill.Slack, ["xoxb-31798286241-HxuRQtrAPBwmKYx7oK6DEr51", ""])
+		System.get_env("SLACK_TOKENS")
+		|> String.split(",")
+		|> Enum.each(fn token -> Bot.enable_skill(bot, Bot.Skill.Slack, [token, ""]) end)
 
 		# Reddit
 		Bot.enable_skill(bot, Jarvis.Reddit.Link, [])
