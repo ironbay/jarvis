@@ -6,9 +6,15 @@ defmodule Jarvis do
 	def start(_type, _args) do
 		import Supervisor.Spec, warn: false
 
+		stores = [
+			{Delta.Stores.Cassandra, {}}
+		]
+		plugins = []
+
 		# Define workers and child supervisors to be supervised
 		children = [
 			# Starts a worker by calling: Bot.Worker.start_link(arg1, arg2, arg3)
+			supervisor(Delta, [stores, plugins, Delta]),
 			worker(Jarvis.Proxy, []),
 		]
 
@@ -32,8 +38,9 @@ defmodule Jarvis.Proxy do
 
 		# Core
 		Bot.enable_skill(bot, Bot.Skill.Regex, [])
-		Bot.enable_skill(bot, Bot.Skill.Controller, [])
 		Bot.enable_skill(bot, Bot.Skill.Locale, [])
+		Bot.enable_skill(bot, Bot.Skill.Controller, [])
+		Bot.enable_skill(bot, Bot.Skill.User, [])
 		Bot.enable_skill(bot, Bot.Skill.Link, [])
 
 		# Fun
@@ -42,9 +49,13 @@ defmodule Jarvis.Proxy do
 		Bot.enable_skill(bot, Bot.Skill.Name, [])
 
 		# Slack
-		System.get_env("SLACK_TOKENS")
-		|> String.split(",")
-		|> Enum.each(fn token -> Bot.enable_skill(bot, Bot.Skill.Slack, [token, ""]) end)
+		case System.get_env("SLACK_TOKENS") do
+			nil -> :skip
+			result ->
+				result
+				|> String.split(",")
+				|> Enum.each(fn token -> Bot.enable_skill(bot, Bot.Skill.Slack, [token, ""]) end)
+		end
 
 		# Reddit
 		Bot.enable_skill(bot, Jarvis.Reddit.Link, [])

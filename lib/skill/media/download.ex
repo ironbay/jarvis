@@ -8,7 +8,7 @@ defmodule Jarvis.Media.Download do
 
 	def begin(bot, args) do
 		Bot.cast(bot, "regex.add", {"^download (?P<query>.+)", "torrent.search"})
-		Bot.cast(bot, "regex.add", {"^(?P<index>\\d+)$", "chat.index"})
+		Bot.cast(bot, "regex.add", {"^(?P<number>\\d+)$", "chat.number"})
 		{:ok, %{}}
 	end
 
@@ -49,8 +49,8 @@ defmodule Jarvis.Media.Download do
 				Bot.cast(bot, "bot.message", "Which one?", context)
 				Bot.cast(bot, "bot.message", message, context)
 
-				{_, %{index: index}, _} = Bot.wait(bot, context, ["chat.index"])
-				{item, _} = Enum.at(options, index)
+				{_, %{number: number}, _} = Bot.wait(bot, context, ["chat.number"])
+				{item, _} = Enum.at(options, number)
 				Bot.call(bot, "torrent.download", item)
 				Bot.cast(bot, "bot.message", "Downloading #{item.name}", context)
 		end
