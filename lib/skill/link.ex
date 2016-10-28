@@ -1,81 +1,31 @@
 defmodule Jarvis.Link do
+	alias Delta.Plugin.Fact
 	use Bot.Skill
 
 	def begin(bot, []) do
-		{:ok, %{}}
+		{:ok, Delta.start_session(Delta, "jarvis")}
 	end
 
-	def handle_cast_async({"link.direct", %{url: url}, %{sender: sender, type: type, channel: channel}}, bot, _data) do
-		Bot.call(bot, "graph.triple", %{
-			nodes: %{
-				link: %{
-					type: "link",
-					token: url,
-				},
-				sender: %{
-					type: "source",
-					token: "#{type}/#{sender}"
-				},
-				# channel: %{
-				# 	type: "channel",
-				# 	token: "#{type}/#{channel}",
-				# },
-			},
-			edges: [
-				[:sender, "DID_SHARE", :link],
-				# [:channel, "HAS_LINK", :link],
-			]
-		})
+	def handle_cast_async({"link.direct", %{url: url}, %{sender: sender, type: type, channel: channel}}, bot, session) do
+		encoded = URI.encode_www_form(url)
+		Fact.add_fact(session, sender, "share:url", encoded)
+		Fact.add_fact(session, channel, "contains:url", encoded)
 		:ok
 	end
 
-	def handle_cast_async({"graph", body = %{type: type, url: url}, _context}, bot, _data) do
-		Bot.call(bot, "graph.triple", %{
-			nodes: %{
-				link: %{
-					type: "link",
-					token: url,
-				},
-				item: %{
-					type: type,
-					token: url,
-				},
-				image: %{
-					type: "image",
-					token: body.image,
-				},
-				title: %{
-					type: "title",
-					token: body.title,
-				},
-			},
-			edges: [
-				[:link, "IS", :item],
-				[:item, "HAS_IMAGE", :image],
-				[:item, "HAS_TITLE", :title],
-			]
-		})
+	def handle_cast_async({"graph", body = %{type: type, url: url}, _context}, bot, session) do
+		encoded = URI.encode_www_form(url)
+		Fact.add_fact(session, encoded, "og:type", type)
+		Fact.add_fact(session, encoded, "og:image", body.image)
+		Fact.add_fact(session, encoded, "og:title", body.title)
 		:ok
 	end
 
-	def handle_cast_async({"link.tags", %{url: url, tags: tags }, _context}, bot, _data) do
+	def handle_cast_async({"link.tags", %{url: url, tags: tags }, _context}, bot, session) do
+		encoded = URI.encode_www_form(url)
 		Enum.each(tags, fn(tag) ->
 			tag = String.downcase(tag)
-			Bot.call(bot, "graph.triple", %{
-				nodes: %{
-					link: %{
-						type: "link",
-						token: url,
-					},
-					tag: %{
-						type: "tag",
-						token: tag,
-					},
-				},
-				edges: [
-					[:link, "HAS_TAG", :tag]
-				]
-			})
+			Fact.add_fact(session, encoded, "og:tag", tag)
 		end)
 		:ok
 	end

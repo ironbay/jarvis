@@ -3,7 +3,7 @@
   "con_cache": {:hex, :con_cache, "0.11.1", "acbe5a1d10c47faba30d9629c9121e1ef9bca0aa5eddbb86f4e777bd9f9f9b6f", [:mix], [{:exactor, "~> 2.2.0", [hex: :exactor, optional: false]}]},
   "cqerl": {:git, "https://github.com/matehat/cqerl.git", "b3e9fd0b571ecd48dc8e3206c72b66acecde16ed", []},
   "cqex": {:hex, :cqex, "0.2.0", "e94f565527b7440f1f894dfdda8b3df0b5bd12a9416d0306076a60dc65f1b4e6", [:mix], []},
-  "delta": {:git, "https://github.com/ironbay/delta.git", "6ca03de43a5165add8200cfb875c2385f6a9eaf2", [branch: "elixir"]},
+  "delta": {:git, "https://github.com/ironbay/delta.git", "3cae38ab51a1f34c9c8de6e3cec06e59e2d9ef52", [branch: "elixir"]},
   "exactor": {:hex, :exactor, "2.2.2", "90b27d72c05614801a60f8400afd4e4346dfc33ea9beffe3b98a794891d2ff96", [:mix], []},
   "exirc": {:hex, :exirc, "0.11.0", "8d4adab6f7ab9e07d9c9f171ef05ed891357ea2de68604b9705217e526090b25", [:mix], []},
   "exjsx": {:hex, :exjsx, "3.2.0", "7136cc739ace295fc74c378f33699e5145bead4fdc1b4799822d0287489136fb", [:mix], [{:jsx, "~> 2.6.2", [hex: :jsx, optional: false]}]},
