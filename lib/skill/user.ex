@@ -2,7 +2,7 @@ defmodule Bot.Skill.User do
 	use Bot.Skill
 
 	def begin(bot, []) do
-		Bot.cast(bot, "regex.add", {"register", "user.register"})
+		Bot.cast(bot, "regex.add", {"^register$", "user.register"})
 		Bot.cast(bot, "regex.add", {"who am i", "user.who"})
 		Bot.cast(bot, "regex.add", {"my name is (?<name>.+)", "user.register.name"})
 		Bot.cast(bot, "regex.add", {"call me (?<name>.+)", "user.register.name"})
