@@ -24,7 +24,7 @@ defmodule Bot.Skill.User do
 		:ok
 	end
 
-	def handle_call({"user.find", _body, context}, bot, session) do
+	def handle_call({"user.who", _body, context}, bot, session) do
 		{:ok, from_context(session, context)}
 	end
 
