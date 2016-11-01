@@ -4,7 +4,7 @@ defmodule Jarvis.Link do
 
 	def begin(bot, []) do
 		Bot.cast(bot, "regex.add", {"link history", "link.history"})
-		Bot.cast(bot, "regex.add", {"links about (?<tag>.+)", "link.search"})
+		Bot.cast(bot, "regex.add", {"links about (?<tag>.+) from here", "link.search.channel"})
 		{:ok, Delta.start_session(Delta, "jarvis")}
 	end
 
@@ -40,14 +40,12 @@ defmodule Jarvis.Link do
 		:ok
 	end
 
-	def handle_cast({"link.search", %{tag: tag}, context = %{channel: channel}}, bot, session) do
-		IO.inspect(tag)
+	def handle_cast({"link.search.channel", %{tag: tag}, context = %{channel: channel}}, bot, session) do
 		Fact.query(session, [
 			[:url],
 			[:url, "og:tag", tag],
 			[channel, "contains:url", :url]
 		])
-		|> IO.inspect
 		|> Enum.each(fn x ->
 			Bot.cast(bot, "bot.message", x, context)
 		end)
