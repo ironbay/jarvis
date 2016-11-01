@@ -4,7 +4,8 @@ defmodule Jarvis.Link do
 
 	def begin(bot, []) do
 		Bot.cast(bot, "regex.add", {"link history", "link.history"})
-		Bot.cast(bot, "regex.add", {"my links", "link.mine"})
+		Bot.cast(bot, "regex.add", {"^my links$", "link.mine"})
+		Bot.cast(bot, "regex.add", {"^what do I like$", "link.analysis"})
 		Bot.cast(bot, "regex.add", {"links about (?<tag>.+) from here", "link.search.channel"})
 		{:ok, Delta.start_session(Delta, "jarvis")}
 	end
@@ -50,6 +51,31 @@ defmodule Jarvis.Link do
 		])
 		|> Enum.flat_map(&(&1))
 		|> Enum.each(fn x ->
+			Bot.cast(bot, "bot.message", x, context)
+		end)
+		:ok
+	end
+
+	def handle_cast({"link.analysis", _, context = %{channel: channel}}, bot, session) do
+		{user, _} = Bot.call(bot, "user.who", %{}, context)
+		Fact.query(session, [
+			[:url],
+			[:sender, "user:key", user],
+			[:sender, "share:url", :url],
+		])
+		|> Enum.flat_map(&(&1))
+		|> Enum.flat_map(fn x ->
+			Fact.query(session, [
+				[:tag],
+				[x, "og:tag", :tag]
+			])
+		end)
+		|> Enum.group_by(&(&1))
+		|> Enum.map(fn {key, value} -> {key, Enum.count(value)} end)
+		|> Enum.sort_by(fn {key, value} -> value end)
+		|> Enum.take(5)
+		|> IO.inspect
+		|> Enum.each(fn {x, _} ->
 			Bot.cast(bot, "bot.message", x, context)
 		end)
 		:ok
