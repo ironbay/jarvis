@@ -7,11 +7,16 @@ defmodule Bot.Skill.User do
 		Bot.cast(bot, "regex.add", {"who am i", "user.who"})
 		Bot.cast(bot, "regex.add", {"my name is (?<name>.+)", "user.register.name"})
 		Bot.cast(bot, "regex.add", {"call me (?<name>.+)", "user.register.name"})
+		Bot.cast(bot, "regex.add", {"(?P<number>\\d{10})", "user.register.phone"})
 		Bot.cast(bot, "regex.add", {".+@.+", "chat.email"})
+		Bot.cast(bot, "regex.add", {"yes", "chat.yes"})
+		Bot.cast(bot, "regex.add", {"no", "chat.no"})
+
 		Bot.cast(bot, "locale.add", {"bot.register.email", "What is your email?"})
-		Bot.cast(bot, "locale.add", {"bot.user.success", "Great thanks!"})
+		Bot.cast(bot, "locale.add", {"bot.success", "Great thanks!"})
 		Bot.cast(bot, "locale.add", {"bot.user.already", "You have already linked this <%= type %> account"})
 		Bot.cast(bot, "locale.add", {"bot.ack", "Sounds good"})
+		Bot.cast(bot, "locale.add", {"bot.rejected", "Oh okay"})
 		{:ok, Delta.start_session(Delta, "jarvis")}
 	end
 
@@ -33,7 +38,6 @@ defmodule Bot.Skill.User do
 				Fact.add_fact(session, sender, "context:type", type)
 				Fact.add_fact(session, sender, "user:key", key)
 
-
 				Bot.cast(bot, "bot.user.success", %{}, context)
 			data ->
 				IO.inspect(data)
@@ -49,6 +53,23 @@ defmodule Bot.Skill.User do
 				Delta.Plugin.Fact.del_fact(session, key, "user:name", existing)
 				Delta.Plugin.Fact.add_fact(session, key, "user:name", name)
 				Bot.cast(bot, "bot.ack", %{}, context)
+		end
+		:ok
+	end
+
+
+	def handle_cast_async({"user.register.phone", %{number: number}, context}, bot, session) do
+		case from_context(session, context) do
+			nil -> :skip
+			{key, name} ->
+				Bot.cast(bot, "bot.message", "#{name || "Hey"}, is #{number} your number?", context)
+				case Bot.wait(bot, context, ["chat.yes", "chat.no"]) do
+					{"chat.no", _, _} -> :skip
+						Bot.cast(bot, "bot.rejected", %{}, context)
+					{"chat.yes", _, _} ->
+						Delta.Plugin.Fact.add_fact(session, key, "user:phone", number)
+						Bot.cast(bot, "bot.success", %{}, context)
+				end
 		end
 		:ok
 	end
