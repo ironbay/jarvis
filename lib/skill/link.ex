@@ -3,29 +3,53 @@ defmodule Jarvis.Link do
 	use Bot.Skill
 
 	def begin(bot, []) do
+		Bot.cast(bot, "regex.add", {"link history", "link.history"})
+		Bot.cast(bot, "regex.add", {"links about (?<tag>.+)", "link.search"})
 		{:ok, Delta.start_session(Delta, "jarvis")}
 	end
 
 	def handle_cast_async({"link.direct", %{url: url}, %{sender: sender, type: type, channel: channel}}, bot, session) do
-		encoded = URI.encode_www_form(url)
-		Fact.add_fact(session, sender, "share:url", encoded)
-		Fact.add_fact(session, channel, "contains:url", encoded)
+		Fact.add_fact(session, sender, "share:url", url)
+		Fact.add_fact(session, channel, "contains:url", url)
 		:ok
 	end
 
 	def handle_cast_async({"graph", body = %{type: type, url: url}, _context}, bot, session) do
-		encoded = URI.encode_www_form(url)
-		Fact.add_fact(session, encoded, "og:type", type)
-		Fact.add_fact(session, encoded, "og:image", body.image)
-		Fact.add_fact(session, encoded, "og:title", body.title)
+		Fact.add_fact(session, url, "og:type", type)
+		Fact.add_fact(session, url, "og:image", body.image)
+		Fact.add_fact(session, url, "og:title", body.title)
 		:ok
 	end
 
 	def handle_cast_async({"link.tags", %{url: url, tags: tags }, _context}, bot, session) do
-		encoded = URI.encode_www_form(url)
 		Enum.each(tags, fn(tag) ->
 			tag = String.downcase(tag)
-			Fact.add_fact(session, encoded, "og:tag", tag)
+			Fact.add_fact(session, url, "og:tag", tag)
+		end)
+		:ok
+	end
+
+	def handle_cast({"link.history", _, context = %{channel: channel}}, bot, session) do
+		Fact.query(session, [
+			[:url],
+			[channel, "contains:url", :url]
+		])
+		|> Enum.each(fn x ->
+			Bot.cast(bot, "bot.message", x, context)
+		end)
+		:ok
+	end
+
+	def handle_cast({"link.search", %{tag: tag}, context = %{channel: channel}}, bot, session) do
+		IO.inspect(tag)
+		Fact.query(session, [
+			[:url],
+			[:url, "og:tag", tag],
+			[channel, "contains:url", :url]
+		])
+		|> IO.inspect
+		|> Enum.each(fn x ->
+			Bot.cast(bot, "bot.message", x, context)
 		end)
 		:ok
 	end

@@ -1,4 +1,5 @@
 defmodule Bot.Skill.User do
+	alias Delta.Plugin.Fact
 	use Bot.Skill
 
 	def begin(bot, []) do
@@ -6,7 +7,8 @@ defmodule Bot.Skill.User do
 		Bot.cast(bot, "regex.add", {"who am i", "user.who"})
 		Bot.cast(bot, "regex.add", {"my name is (?<name>.+)", "user.register.name"})
 		Bot.cast(bot, "regex.add", {"call me (?<name>.+)", "user.register.name"})
-		Bot.cast(bot, "locale.add", {"bot.user.register", "What is your phone number? Only numbers please"})
+		Bot.cast(bot, "regex.add", {".+@.+", "chat.email"})
+		Bot.cast(bot, "locale.add", {"bot.register.email", "What is your email?"})
 		Bot.cast(bot, "locale.add", {"bot.user.success", "Great thanks!"})
 		Bot.cast(bot, "locale.add", {"bot.user.already", "You have already linked this <%= type %> account"})
 		Bot.cast(bot, "locale.add", {"bot.ack", "Sounds good"})
@@ -16,12 +18,25 @@ defmodule Bot.Skill.User do
 	def handle_cast_async({"user.register", _body, context = %{type: type, sender: sender}}, bot, session) do
 		case from_context(session, context) do
 			nil ->
-				Bot.cast(bot, "bot.user.register", %{}, context)
-				{_, %{number: number}, _} = Bot.wait(bot, context, ["chat.number"])
-				Delta.Plugin.Fact.add_fact(session, sender, "context:type", type)
-				Delta.Plugin.Fact.add_fact(session, sender, "phone:number", number)
+				Bot.cast(bot, "bot.register.email", %{}, context)
+				{_, %{raw: email}, _} = Bot.wait(bot, context, ["chat.email"])
+				key =
+					case from_email(session, email) do
+						nil ->
+							key = Delta.UUID.ascending()
+							Bot.cast(bot, "bot.message", "Looks like you're new, we've created a new account for you: #{key}", context)
+							Fact.add_fact(session, key, "user:email", email)
+							key
+						key -> key |> IO.inspect
+					end
+
+				Fact.add_fact(session, sender, "context:type", type)
+				Fact.add_fact(session, sender, "user:key", key)
+
+
 				Bot.cast(bot, "bot.user.success", %{}, context)
-			_ ->
+			data ->
+				IO.inspect(data)
 				Bot.cast(bot, "bot.user.already", %{type: type},context)
 		end
 		:ok
@@ -50,11 +65,18 @@ defmodule Bot.Skill.User do
 
 	defp from_context(session, %{type: type, sender: sender}) do
 		Delta.Plugin.Fact.query(session, [
-			[:number, :name],
-			[sender, "phone:number", :number],
-			[:number, "user:name", :name],
+			[:key, :name],
+			[sender, "user:key", :key],
+			[:key, "user:name", :name],
 		])
 		|> List.first
+	end
+
+	defp from_email(session, email) do
+		Delta.Plugin.Fact.query(session, [
+			[:key],
+			[:key, "user:email", email]
+		])
 	end
 
 end
