@@ -17,7 +17,7 @@ defmodule Bot.Skill.User do
 
 	def handle_cast_async({"user.register", _body, context = %{type: type, sender: sender}}, bot, session) do
 		case from_context(session, context) do
-			nil ->
+			_ ->
 				Bot.cast(bot, "bot.register.email", %{}, context)
 				{_, %{raw: email}, _} = Bot.wait(bot, context, ["chat.email"])
 				key =
@@ -77,6 +77,7 @@ defmodule Bot.Skill.User do
 			[:key],
 			[:key, "user:email", email]
 		])
+		|> List.first
 	end
 
 end
