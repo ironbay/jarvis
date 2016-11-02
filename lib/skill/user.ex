@@ -90,6 +90,7 @@ defmodule Bot.Skill.User do
 			[sender, "user:key", :key],
 			[:key, "user:name", :name],
 		])
+		|> List.zip
 		|> List.first
 	end
 
@@ -98,6 +99,7 @@ defmodule Bot.Skill.User do
 			[:key],
 			[:key, "user:email", email]
 		])
+		|> List.zip
 		|> List.first
 	end
 

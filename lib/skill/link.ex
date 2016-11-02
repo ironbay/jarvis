@@ -49,8 +49,9 @@ defmodule Jarvis.Link do
 			[:sender, "user:key", user],
 			[:sender, "share:url", :url]
 		])
-		|> Enum.flat_map(&(&1))
-		|> Enum.each(fn x ->
+		|> List.zip
+		|> IO.inspect
+		|> Enum.each(fn {x} ->
 			Bot.cast(bot, "bot.message", x, context)
 		end)
 		:ok
@@ -59,17 +60,11 @@ defmodule Jarvis.Link do
 	def handle_cast({"link.analysis", _, context = %{channel: channel}}, bot, session) do
 		{user, _} = Bot.call(bot, "user.who", %{}, context)
 		Fact.query(session, [
-			[:url],
+			[:tag],
 			[:sender, "user:key", user],
 			[:sender, "share:url", :url],
+			[:url, "og:tag", :tag],
 		])
-		|> Enum.flat_map(&(&1))
-		|> Enum.flat_map(fn x ->
-			Fact.query(session, [
-				[:tag],
-				[x, "og:tag", :tag]
-			])
-		end)
 		|> Enum.group_by(&(&1))
 		|> Enum.map(fn {key, value} -> {key, Enum.count(value)} end)
 		|> Enum.sort_by(fn {key, value} -> value end)
