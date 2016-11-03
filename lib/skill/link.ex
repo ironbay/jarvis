@@ -69,10 +69,11 @@ defmodule Jarvis.Link do
 		|> Enum.group_by(&(&1))
 		|> Enum.map(fn {key, value} -> {key, Enum.count(value)} end)
 		|> Enum.sort_by(fn {key, value} -> value end)
-		|> Enum.take(5)
+		|> Enum.filter(fn {key, value} -> value > 1 end)
 		|> IO.inspect
-		|> Enum.each(fn {x, _} ->
-			Bot.cast(bot, "bot.message", x, context)
+		|> Enum.take(5)
+		|> Enum.each(fn {x, count} ->
+			Bot.cast(bot, "bot.message", "#{x} - #{count}", context)
 		end)
 		:ok
 	end
