@@ -75,22 +75,21 @@ defmodule Bot.Skill.User do
 	end
 
 	def handle_call({"user.who", _body, context}, bot, session) do
-		{:ok, from_context(session, context)}
+		[key] = from_context(session, context)
+		{:ok, key}
 	end
 
 	def handle_cast({"user.who", _body, context}, bot, session) do
-		{number, name} = from_context(session, context)
-		Bot.cast(bot, "bot.message", "#{number} - #{name}", context)
+		[key] = from_context(session, context)
+		Bot.cast(bot, "bot.message", "#{key}", context)
 		:ok
 	end
 
 	defp from_context(session, %{type: type, sender: sender}) do
 		Delta.Plugin.Fact.query(session, [
-			[:key, :name],
+			[:key],
 			[sender, "user:key", :key],
-			[:key, "user:name", :name],
 		])
-		|> List.zip
 		|> List.first
 	end
 

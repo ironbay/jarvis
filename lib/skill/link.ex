@@ -43,7 +43,7 @@ defmodule Jarvis.Link do
 	end
 
 	def handle_cast({"link.mine", _, context = %{channel: channel}}, bot, session) do
-		{user, _} = Bot.call(bot, "user.who", %{}, context)
+		user = Bot.call(bot, "user.who", %{}, context)
 		Fact.query(session, [
 			[:url],
 			[:sender, "user:key", user],
@@ -58,13 +58,14 @@ defmodule Jarvis.Link do
 	end
 
 	def handle_cast({"link.analysis", _, context = %{channel: channel}}, bot, session) do
-		{user, _} = Bot.call(bot, "user.who", %{}, context)
+		user = Bot.call(bot, "user.who", %{}, context)
 		Fact.query(session, [
 			[:tag],
 			[:sender, "user:key", user],
 			[:sender, "share:url", :url],
 			[:url, "og:tag", :tag],
 		])
+		|> Enum.flat_map(&(&1))
 		|> Enum.group_by(&(&1))
 		|> Enum.map(fn {key, value} -> {key, Enum.count(value)} end)
 		|> Enum.sort_by(fn {key, value} -> value end)
