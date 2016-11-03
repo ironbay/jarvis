@@ -1,6 +1,7 @@
 defmodule Jarvis.Music do
-	require Logger
 	use Bot.Skill
+	require Logger
+	alias Delta.Plugin.Fact
 
 	def begin(bot, []) do
 		Bot.cast(bot, "regex.add", {"^find song (?P<query>.+)", "music.search"})
@@ -14,6 +15,7 @@ defmodule Jarvis.Music do
 				"#{cleanse(left)} - #{cleanse(right)}"
 				|> search
 				|> List.first
+				|> fact(url, session)
 				|> create
 				|> broadcast(bot, context)
 			_ ->
@@ -46,7 +48,12 @@ defmodule Jarvis.Music do
 		|> Poison.decode!(as: %{})
 	end
 
+	def fact(data, url, session) do
+		data
+	end
+
 	def create(data) do
+
 		json = Poison.encode!(data)
 		"http://www.songl.ink/create"
 		|> HTTPoison.post!(json, [
