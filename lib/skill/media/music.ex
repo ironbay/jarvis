@@ -3,6 +3,7 @@ defmodule Jarvis.Music do
 	use Bot.Skill
 
 	def begin(bot, []) do
+		Bot.cast(bot, "regex.add", {"^find song (?P<query>.+)", "music.search"})
 		{:ok, Delta.start_session(Delta, "jarvis")}
 	end
 
@@ -17,6 +18,15 @@ defmodule Jarvis.Music do
 				|> broadcast(bot, context)
 			_ ->
 		end
+	end
+
+	def handle_cast_async({"music.search", body = %{query: query}, context}, bot, session) do
+		query
+		|> search
+		|> List.first
+		|> create
+		|> broadcast(bot, context)
+		:ok
 	end
 
 	def cleanse(title) do
