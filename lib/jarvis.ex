@@ -73,6 +73,9 @@ defmodule Jarvis.Proxy do
 		Bot.enable_skill(bot, Jarvis.Media.TL, [])
 		Bot.enable_skill(bot, Jarvis.Media.Download, [])
 
+		# Music
+		Bot.enable_skill(bot, Jarvis.Music, [])
+
 		# Video
 		# Bot.enable_skill(bot, Jarvis.Media.Youtube, ["channel/UCWrmUNZB9-p6zgNhwNlEcyw"])
 		# Bot.enable_skill(bot, Jarvis.Media.Youtube, ["user/taimur38"])
