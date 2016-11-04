@@ -9,7 +9,7 @@ defmodule Jarvis.Music do
 	end
 
 	def handle_cast_async({"graph", body = %{url: url, title: title}, context}, bot, session) do
-		case Regex.scan(~r/(.+)(-|by)(.+)/, title) do
+		case Regex.scan(~r/(.+)(-|by|—)(.+)/, title) do
 			[] -> :skip
 			[[_, left, _, right]] ->
 				"#{cleanse(left)} - #{cleanse(right)}"

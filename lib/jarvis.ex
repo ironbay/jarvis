@@ -16,6 +16,7 @@ defmodule Jarvis do
 			# Starts a worker by calling: Bot.Worker.start_link(arg1, arg2, arg3)
 			supervisor(Delta, [stores, plugins, Delta]),
 			worker(Jarvis.Proxy, []),
+			worker(Jarvis.Rest, []),
 		]
 
 
@@ -75,6 +76,10 @@ defmodule Jarvis.Proxy do
 
 		# Music
 		Bot.enable_skill(bot, Jarvis.Music, [])
+
+		Bot.enable_skill(bot, Jarvis.ContextIO.Register, [])
+		Bot.enable_skill(bot, Jarvis.Gmail.Register, [])
+		Bot.enable_skill(bot, Jarvis.Gmail.Poller, ["0NdIcS7ghINF5J5uVbWT", "d@ly.ht", "1/oP00g5WASbdRk5Xj9XrFHb7_Viu00asWUo7hkyA34-0"])
 
 		# Video
 		# Bot.enable_skill(bot, Jarvis.Media.Youtube, ["channel/UCWrmUNZB9-p6zgNhwNlEcyw"])
