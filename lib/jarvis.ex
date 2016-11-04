@@ -78,8 +78,6 @@ defmodule Jarvis.Proxy do
 		Bot.enable_skill(bot, Jarvis.Music, [])
 
 		Bot.enable_skill(bot, Jarvis.ContextIO.Register, [])
-		Bot.enable_skill(bot, Jarvis.Gmail.Register, [])
-		Bot.enable_skill(bot, Jarvis.Gmail.Poller, ["0NdIcS7ghINF5J5uVbWT", "d@ly.ht", "1/oP00g5WASbdRk5Xj9XrFHb7_Viu00asWUo7hkyA34-0"])
 
 		# Video
 		# Bot.enable_skill(bot, Jarvis.Media.Youtube, ["channel/UCWrmUNZB9-p6zgNhwNlEcyw"])

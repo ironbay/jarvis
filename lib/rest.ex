@@ -6,10 +6,17 @@ defmodule Jarvis.Rest do
 	plug :match
 	plug :dispatch
 
-	get "/oauth/contextio/callback" do
+	get "/external/contextio/callback" do
 		conn = fetch_query_params(conn)
 		token = Map.get(conn.params, "contextio_token")
 		Bot.cast(:jarvis, "contextio.callback", token, %{type: "contextio", sender: token})
+		send_resp(conn, 200, "ok")
+	end
+
+	post "/external/contextio/hook" do
+		read_body(conn)
+		|> IO.inspect
+
 		send_resp(conn, 200, "ok")
 	end
 
