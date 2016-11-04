@@ -68,8 +68,8 @@ defmodule Jarvis.Link do
 		|> Enum.flat_map(&(&1))
 		|> Enum.group_by(&(&1))
 		|> Enum.map(fn {key, value} -> {key, Enum.count(value)} end)
-		|> Enum.sort_by(fn {key, value} -> value end)
 		|> Enum.filter(fn {key, value} -> value > 1 end)
+		|> Enum.sort_by(fn {key, value} -> value end, &Kernel.>=/2)
 		|> IO.inspect
 		|> Enum.take(5)
 		|> Enum.each(fn {x, count} ->

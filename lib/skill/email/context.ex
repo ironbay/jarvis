@@ -27,7 +27,7 @@ defmodule Jarvis.ContextIO.Register do
 			_ ->
 				Bot.cast(bot, "bot.message", "What email would you like to register?", context)
 				{_, %{raw: email}, _} = Bot.wait(bot, context, ["chat.email"])
-				result = Api.post_data!("/connect_tokens", %{"email" => email, "callback_url" => "http://localhost:4000/external/contextio/callback"})
+				result = Api.post_data!("/connect_tokens", %{"email" => email, "callback_url" => "http://jarvis.ironbay.digital/external/contextio/callback"})
 				%{"browser_redirect_url" => url, "token" => token} = result
 				Bot.cast(bot, "bot.message", "Go here #{url}", context)
 				{_, token, _} = Bot.wait(bot, %{type: "contextio", sender: token}, ["contextio.callback"])
@@ -69,8 +69,10 @@ defmodule Jarvis.ContextIO.Poller do
 	end
 
 	def handle_info({:poll, time}, bot, state) do
-		pull(state.account, time)
-		|> IO.inspect
+		case pull(state.account, time) do
+			[] -> :skip
+			result -> IO.inspect(result)
+		end
 		schedule(@interval)
 		{:ok, state}
 	end
