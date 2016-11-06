@@ -16,7 +16,7 @@ defmodule Jarvis.Gmail.Register do
 	def handle_cast_async({"gmail.register", _, context}, bot, _state) do
 		Bot.cast(bot, "bot.message", "To register go here and tell me the code you get #{@auth}", context)
 		{_, %{text: code}, _} = Bot.wait(bot, context, ["chat.message"])
-		HTTPoison.post!(@token, {:form, [
+		HTTPoison.post(@token, {:form, [
 			code: code,
 			client_id: @client_id,
 			client_secret: @client_secret,

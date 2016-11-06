@@ -2,9 +2,30 @@ defmodule Jarvis.Rest do
 	use Plug.Router
 	import Plug.Conn
 	import Plug.Conn.Utils
+	alias Delta.Dynamic
 
 	plug :match
 	plug :dispatch
+
+	get "/external/nylas/callback" do
+		conn = fetch_query_params(conn)
+		state = Map.get(conn.params, "state")
+		Bot.cast(:jarvis, "nylas.callback", conn.params, %{type: "nylas", channel: state})
+		send_resp(conn, 200, "ok")
+	end
+
+	get "/external/nylas/hook" do
+		conn = fetch_query_params(conn)
+		send_resp(conn, 200, Map.get(conn.params, "challenge"))
+	end
+
+	post "/external/nylas/hook" do
+		{:ok, data, _} = read_body(conn)
+		Poison.decode!(data, as: %{})
+		|> Map.get("deltas")
+		|> Enum.each(&Bot.cast(:jarvis, "nylas.delta", &1, %{type: "nylas", sender: Dynamic.get(&1, ["object_data", "account_id"])}))
+		send_resp(conn, 200, "ok")
+	end
 
 	get "/external/contextio/callback" do
 		conn = fetch_query_params(conn)
@@ -14,8 +35,9 @@ defmodule Jarvis.Rest do
 	end
 
 	post "/external/contextio/hook" do
-		read_body(conn)
-		|> IO.inspect
+		{:ok, data, _} = read_body(conn)
+		message = Poison.decode!(data, as: %{})
+		Bot.cast(:jarvis, "contextio.message", message)
 
 		send_resp(conn, 200, "ok")
 	end

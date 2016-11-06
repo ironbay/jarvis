@@ -7,12 +7,6 @@ defmodule Jarvis.ContextIO.Register do
 	def begin(bot, args) do
 		Bot.cast(bot, "regex.add", {"^register email$", "contextio.register"})
 		session = Delta.session(Delta)
-		Fact.query(session, [
-			[:account],
-			[:account, "context:type", "contextio"]
-		])
-		[["581ce935fc61d76c3b8b4567"]]
-		|> Enum.each(&Bot.enable_skill(bot, Jarvis.ContextIO.Poller, &1))
 		{:ok, Delta.session(Delta)}
 	end
 
@@ -49,36 +43,11 @@ defmodule Jarvis.ContextIO.Register do
 
 		:ok
 	end
-end
 
-defmodule Jarvis.ContextIO.Poller do
-	use Bot.Skill
-	alias Jarvis.ContextIO.Api
 
-	@interval 5 * 1000
-
-	def begin(bot, [account]) do
-		schedule(0)
-		{:ok, %{
-			account: account,
-		}}
-	end
-
-	def schedule(interval) do
-		Process.send_after(self, {:poll, :erlang.system_time(:seconds)}, interval)
-	end
-
-	def handle_info({:poll, time}, bot, state) do
-		case pull(state.account, time) do
-			[] -> :skip
-			result -> IO.inspect(result)
-		end
-		schedule(@interval)
-		{:ok, state}
-	end
-
-	def pull(account, since) do
-		Api.get_data!("/accounts/#{account}/messages", %{"indexed_after" => since})
+	def handle_cast_async({"contextio.message", body, context}, bot, session) do
+		IO.inspect(body)
+		:ok
 	end
 
 end

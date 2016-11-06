@@ -49,9 +49,8 @@ defmodule Jarvis.Link do
 			[:sender, "user:key", user],
 			[:sender, "share:url", :url]
 		])
-		|> List.zip
-		|> IO.inspect
-		|> Enum.each(fn {x} ->
+		|> Enum.flat_map(&(&1))
+		|> Enum.each(fn x ->
 			Bot.cast(bot, "bot.message", x, context)
 		end)
 		:ok

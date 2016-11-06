@@ -68,7 +68,7 @@ defmodule Jarvis.Proxy do
 		Bot.enable_skill(bot, Bot.Skill.Alchemy, ["67f1fe52543de6001b8d1cff4e60f2e0d3404e7b"])
 		Bot.enable_skill(bot, Jarvis.Wolfram, ["99AK9Y-RQEX2UU3GT"])
 		Bot.enable_skill(bot, Jarvis.Graph, [])
-		Bot.enable_skill(bot, Jarvis.Media, [])
+		# Bot.enable_skill(bot, Jarvis.Media, [])
 
 		# Torrent
 		Bot.enable_skill(bot, Jarvis.Media.TL, [])
@@ -78,6 +78,9 @@ defmodule Jarvis.Proxy do
 		Bot.enable_skill(bot, Jarvis.Music, [])
 
 		Bot.enable_skill(bot, Jarvis.ContextIO.Register, [])
+		Bot.enable_skill(bot, Jarvis.Nylas, [])
+		Bot.enable_skill(bot, Jarvis.Gmail.Register, [])
+		Bot.enable_skill(bot, Jarvis.Package, [])
 
 		# Video
 		# Bot.enable_skill(bot, Jarvis.Media.Youtube, ["channel/UCWrmUNZB9-p6zgNhwNlEcyw"])

@@ -15,7 +15,7 @@ defmodule Jarvis.Music do
 				"#{cleanse(left)} - #{cleanse(right)}"
 				|> search
 				|> List.first
-				# |> fact(url, session)
+				|> fact(url, session)
 				|> create
 				|> broadcast(bot, context)
 			_ ->
@@ -51,6 +51,7 @@ defmodule Jarvis.Music do
 	def fact(data, url, session) do
 		%{
 			"source" => source,
+			"share_link" => link,
 			"lookup": %{
 				"trackId" => track,
 				"trackName" => track_name,
@@ -58,6 +59,7 @@ defmodule Jarvis.Music do
 				"artistName" => artist_name,
 			}
 		} = data
+		Fact.add_fact(session, url, "songlink:track", link)
 		Fact.add_fact(session, url, "#{source}:track", track)
 		Fact.add_fact(session, track, "#{source}:artist", artist)
 		Fact.add_fact(session, track, "#{source}:name", track_name)
