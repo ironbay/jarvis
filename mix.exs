@@ -37,7 +37,7 @@ defmodule Jarvis.Mixfile do
 		{:exirc, "~> 0.11.0"},
 		{:neo4j_sips, "~> 0.2"},
 		{:gmail, "~> 0.1"},
-		{:delta, github: "ironbay/delta", branch: "elixir"},
+		{:delta, github: "ironbay/delta-elixir"},
 		{:plug, "~> 1.0"},
 		{:cowboy, "~> 1.0.3"},
 	]

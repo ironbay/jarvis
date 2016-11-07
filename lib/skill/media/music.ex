@@ -1,28 +1,27 @@
 defmodule Jarvis.Music do
 	use Bot.Skill
 	require Logger
-	alias Delta.Plugin.Fact
 
 	def begin(bot, []) do
 		Bot.cast(bot, "regex.add", {"^find song (?P<query>.+)", "music.search"})
-		{:ok, Delta.start_session(Delta, "jarvis")}
+		{:ok, {}}
 	end
 
-	def handle_cast_async({"graph", body = %{url: url, title: title}, context}, bot, session) do
+	def handle_cast_async({"graph", body = %{url: url, title: title}, context}, bot, _data) do
 		case Regex.scan(~r/(.+)(-|by|—)(.+)/, title) do
 			[] -> :skip
 			[[_, left, _, right]] ->
 				"#{cleanse(left)} - #{cleanse(right)}"
 				|> search
 				|> List.first
-				|> fact(url, session)
+				|> fact(url)
 				|> create
 				|> broadcast(bot, context)
 			_ ->
 		end
 	end
 
-	def handle_cast_async({"music.search", body = %{query: query}, context}, bot, session) do
+	def handle_cast_async({"music.search", body = %{query: query}, context}, bot, _data) do
 		query
 		|> search
 		|> List.first
@@ -48,7 +47,7 @@ defmodule Jarvis.Music do
 		|> Poison.decode!(as: %{})
 	end
 
-	def fact(data, url, session) do
+	def fact(data, url) do
 		%{
 			"source" => source,
 			"share_link" => link,
@@ -59,11 +58,11 @@ defmodule Jarvis.Music do
 				"artistName" => artist_name,
 			}
 		} = data
-		Fact.add_fact(session, url, "songlink:track", link)
-		Fact.add_fact(session, url, "#{source}:track", track)
-		Fact.add_fact(session, track, "#{source}:artist", artist)
-		Fact.add_fact(session, track, "#{source}:name", track_name)
-		Fact.add_fact(session, artist, "#{source}:name", artist_name)
+		Delta.add_fact(url, "songlink:track", link)
+		Delta.add_fact(url, "#{source}:track", track)
+		Delta.add_fact(track, "#{source}:artist", artist)
+		Delta.add_fact(track, "#{source}:name", track_name)
+		Delta.add_fact(artist, "#{source}:name", artist_name)
 		data
 	end
 

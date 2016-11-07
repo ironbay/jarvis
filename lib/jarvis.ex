@@ -5,16 +5,9 @@ defmodule Jarvis do
 	# for more information on OTP Applications
 	def start(_type, _args) do
 		import Supervisor.Spec, warn: false
-
-		stores = [
-			{Delta.Stores.Cassandra, {}}
-		]
-		plugins = []
-
 		# Define workers and child supervisors to be supervised
 		children = [
 			# Starts a worker by calling: Bot.Worker.start_link(arg1, arg2, arg3)
-			supervisor(Delta, [stores, plugins, Delta]),
 			worker(Jarvis.Proxy, []),
 			worker(Jarvis.Rest, []),
 		]
@@ -35,7 +28,7 @@ defmodule Jarvis.Proxy do
 	end
 
 	def init(_) do
-		{:ok, bot} = Bot.start_link(:jarvis)
+		{:ok, bot} = Bot.start_link(:jarvis_bot)
 
 		# Core
 		Bot.enable_skill(bot, Bot.Skill.Regex, [])
@@ -78,7 +71,6 @@ defmodule Jarvis.Proxy do
 		Bot.enable_skill(bot, Jarvis.Music, [])
 
 		Bot.enable_skill(bot, Jarvis.ContextIO.Register, [])
-		Bot.enable_skill(bot, Jarvis.Nylas, [])
 		Bot.enable_skill(bot, Jarvis.Gmail.Register, [])
 		Bot.enable_skill(bot, Jarvis.Package, [])
 

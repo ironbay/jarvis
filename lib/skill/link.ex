@@ -1,5 +1,4 @@
 defmodule Jarvis.Link do
-	alias Delta.Plugin.Fact
 	use Bot.Skill
 
 	def begin(bot, []) do
@@ -7,32 +6,32 @@ defmodule Jarvis.Link do
 		Bot.cast(bot, "regex.add", {"^my links$", "link.mine"})
 		Bot.cast(bot, "regex.add", {"^what do I like$", "link.analysis"})
 		Bot.cast(bot, "regex.add", {"links about (?<tag>.+) from here", "link.search.channel"})
-		{:ok, Delta.start_session(Delta, "jarvis")}
+		{:ok, {}}
 	end
 
-	def handle_cast_async({"link.direct", %{url: url}, %{sender: sender, type: type, channel: channel}}, bot, session) do
-		Fact.add_fact(session, sender, "share:url", url)
-		Fact.add_fact(session, channel, "contains:url", url)
+	def handle_cast_async({"link.direct", %{url: url}, %{sender: sender, type: type, channel: channel}}, bot, _data) do
+		Delta.add_fact(sender, "share:url", url)
+		Delta.add_fact(channel, "contains:url", url)
 		:ok
 	end
 
-	def handle_cast_async({"graph", body = %{type: type, url: url}, _context}, bot, session) do
-		Fact.add_fact(session, url, "og:type", type)
-		Fact.add_fact(session, url, "og:image", body.image)
-		Fact.add_fact(session, url, "og:title", body.title)
+	def handle_cast_async({"graph", body = %{type: type, url: url}, _context}, bot, _data) do
+		Delta.add_fact(url, "og:type", type)
+		Delta.add_fact(url, "og:image", body.image)
+		Delta.add_fact(url, "og:title", body.title)
 		:ok
 	end
 
-	def handle_cast_async({"link.tags", %{url: url, tags: tags }, _context}, bot, session) do
+	def handle_cast_async({"link.tags", %{url: url, tags: tags }, _context}, bot, _data) do
 		Enum.each(tags, fn(tag) ->
 			tag = String.downcase(tag)
-			Fact.add_fact(session, url, "og:tag", tag)
+			Delta.add_fact(url, "og:tag", tag)
 		end)
 		:ok
 	end
 
-	def handle_cast({"link.history", _, context = %{channel: channel}}, bot, session) do
-		Fact.query(session, [
+	def handle_cast({"link.history", _, context = %{channel: channel}}, bot, _data) do
+		Delta.query_fact([
 			[:url],
 			[channel, "contains:url", :url]
 		])
@@ -42,9 +41,9 @@ defmodule Jarvis.Link do
 		:ok
 	end
 
-	def handle_cast({"link.mine", _, context = %{channel: channel}}, bot, session) do
+	def handle_cast({"link.mine", _, context = %{channel: channel}}, bot, _data) do
 		user = Bot.call(bot, "user.who", %{}, context)
-		Fact.query(session, [
+		Delta.query_fact([
 			[:url],
 			[:sender, "user:key", user],
 			[:sender, "share:url", :url]
@@ -56,9 +55,9 @@ defmodule Jarvis.Link do
 		:ok
 	end
 
-	def handle_cast({"link.analysis", _, context = %{channel: channel}}, bot, session) do
+	def handle_cast({"link.analysis", _, context = %{channel: channel}}, bot, _data) do
 		user = Bot.call(bot, "user.who", %{}, context)
-		Fact.query(session, [
+		Delta.query_fact([
 			[:tag],
 			[:sender, "user:key", user],
 			[:sender, "share:url", :url],
@@ -78,8 +77,8 @@ defmodule Jarvis.Link do
 	end
 
 
-	def handle_cast({"link.search.channel", %{tag: tag}, context = %{channel: channel}}, bot, session) do
-		Fact.query(session, [
+	def handle_cast({"link.search.channel", %{tag: tag}, context = %{channel: channel}}, bot, _data) do
+		Delta.query_fact([
 			[:url],
 			[:url, "og:tag", tag],
 			[channel, "contains:url", :url]

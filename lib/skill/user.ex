@@ -1,5 +1,4 @@
 defmodule Bot.Skill.User do
-	alias Delta.Plugin.Fact
 	use Bot.Skill
 
 	def begin(bot, []) do
@@ -17,26 +16,26 @@ defmodule Bot.Skill.User do
 		Bot.cast(bot, "locale.add", {"bot.user.already", "You have already linked this <%= type %> account"})
 		Bot.cast(bot, "locale.add", {"bot.ack", "Sounds good"})
 		Bot.cast(bot, "locale.add", {"bot.rejected", "Oh okay"})
-		{:ok, Delta.start_session(Delta, "jarvis")}
+		{:ok, {}}
 	end
 
-	def handle_cast_async({"user.register", _body, context = %{type: type, sender: sender}}, bot, session) do
-		case from_context(session, context) do
-			[] ->
+	def handle_cast_async({"user.register", _body, context = %{type: type, sender: sender}}, bot, _data) do
+		case from_context(context) do
+			nil ->
 				Bot.cast(bot, "bot.register.email", %{}, context)
 				{_, %{raw: email}, _} = Bot.wait(bot, context, ["chat.email"])
 				key =
-					case from_email(session, email) do
+					case from_email(email) do
 						nil ->
 							key = Delta.UUID.ascending()
 							Bot.cast(bot, "bot.message", "Looks like you're new, we've created a new account for you: #{key}", context)
-							Fact.add_fact(session, key, "user:email", email)
+							Delta.add_fact(key, "user:email", email)
 							key
 						key -> key |> IO.inspect
 					end
 
-				Fact.add_fact(session, sender, "context:type", type)
-				Fact.add_fact(session, sender, "user:key", key)
+				Delta.add_fact(sender, "context:type", type)
+				Delta.add_fact(sender, "user:key", key)
 
 				Bot.cast(bot, "bot.user.success", %{}, context)
 			data ->
@@ -46,20 +45,19 @@ defmodule Bot.Skill.User do
 		:ok
 	end
 
-	def handle_cast_async({"user.register.name", %{name: name}, context}, bot, session) do
-		case from_context(session, context) do
+	def handle_cast_async({"user.register.name", %{name: name}, context}, bot, _data) do
+		case from_context(context) do
 			nil -> :skip
-			{key, existing} ->
-				Delta.Plugin.Fact.del_fact(session, key, "user:name", existing)
-				Delta.Plugin.Fact.add_fact(session, key, "user:name", name)
+			[key] ->
+				Delta.add_fact(key, "user:name", name)
 				Bot.cast(bot, "bot.ack", %{}, context)
 		end
 		:ok
 	end
 
 
-	def handle_cast_async({"user.register.phone", %{number: number}, context}, bot, session) do
-		case from_context(session, context) do
+	def handle_cast_async({"user.register.phone", %{number: number}, context}, bot, _data) do
+		case from_context(context) do
 			nil -> :skip
 			{key, name} ->
 				Bot.cast(bot, "bot.message", "#{name || "Hey"}, is #{number} your number?", context)
@@ -67,34 +65,34 @@ defmodule Bot.Skill.User do
 					{"chat.no", _, _} -> :skip
 						Bot.cast(bot, "bot.rejected", %{}, context)
 					{"chat.yes", _, _} ->
-						Delta.Plugin.Fact.add_fact(session, key, "user:phone", number)
+						Delta.add_fact(key, "user:phone", number)
 						Bot.cast(bot, "bot.success", %{}, context)
 				end
 		end
 		:ok
 	end
 
-	def handle_call({"user.who", _body, context}, bot, session) do
-		[key] = from_context(session, context)
+	def handle_call({"user.who", _body, context}, bot, _data) do
+		[key] = from_context(context)
 		{:ok, key}
 	end
 
-	def handle_cast({"user.who", _body, context}, bot, session) do
-		[key] = from_context(session, context)
+	def handle_cast({"user.who", _body, context}, bot, _data) do
+		[key] = from_context(context)
 		Bot.cast(bot, "bot.message", "#{key}", context)
 		:ok
 	end
 
-	defp from_context(session, %{type: type, sender: sender}) do
-		Delta.Plugin.Fact.query(session, [
+	defp from_context(%{type: type, sender: sender}) do
+		Delta.query_fact([
 			[:key],
 			[sender, "user:key", :key],
 		])
 		|> List.first
 	end
 
-	defp from_email(session, email) do
-		Delta.Plugin.Fact.query(session, [
+	defp from_email(email) do
+		Delta.query_fact([
 			[:key],
 			[:key, "user:email", email]
 		])
