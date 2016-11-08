@@ -48,17 +48,16 @@ defmodule Jarvis.Music do
 	end
 
 	def fact(data, url) do
+		IO.inspect(data)
 		%{
 			"source" => source,
-			"share_link" => link,
-			"lookup": %{
+			"lookup" => %{
 				"trackId" => track,
 				"trackName" => track_name,
 				"artistId" => artist,
 				"artistName" => artist_name,
 			}
 		} = data
-		Delta.add_fact(url, "songlink:track", link)
 		Delta.add_fact(url, "#{source}:track", track)
 		Delta.add_fact(track, "#{source}:artist", artist)
 		Delta.add_fact(track, "#{source}:name", track_name)
