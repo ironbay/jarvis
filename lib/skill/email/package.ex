@@ -30,11 +30,11 @@ defmodule Jarvis.Package do
 		@matches
 		|> Enum.flat_map(&scan(&1, content))
 		|> Enum.uniq_by(&Map.get(&1, :number))
-		|> Enum.each(fn package ->
+		|> Enum.map(fn package ->
 			Delta.add_fact(key, "package:number", package.number)
-			Delta.add_fact(key, "package:type", package.type)
+			Delta.add_fact(key, "package:type", Atom.to_string(package.type))
+			Bot.cast(bot, "package", package, context)
 		end)
-		|> Enum.each(&Bot.cast(bot, "package", &1, context))
 		:ok
 	end
 
