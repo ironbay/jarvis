@@ -35,8 +35,9 @@ defmodule Jarvis.Package do
 			|> Map.get("tracking_status") !== nil
 		end)
 		|> Enum.map(fn package ->
-			Delta.add_fact(key, "package:number", package.number)
-			Delta.add_fact(key, "package:type", Atom.to_string(package.type))
+			Delta.add_fact(context.sender, "package:number", package.number)
+			Delta.add_fact(package.number, "package:type", Atom.to_string(package.type))
+			Delta.add_fact(package.number, "package:email", key)
 			Bot.cast(bot, "package", package, context)
 		end)
 		:ok
