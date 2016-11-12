@@ -30,6 +30,10 @@ defmodule Jarvis.Package do
 		@matches
 		|> Enum.flat_map(&scan(&1, content))
 		|> Enum.uniq_by(&Map.get(&1, :number))
+		|> Enum.filter(fn package ->
+			Jarvis.Shippo.status(package.number, package.carrier)
+			|> Map.get("tracking_status") !== nil
+		end)
 		|> Enum.map(fn package ->
 			Delta.add_fact(key, "package:number", package.number)
 			Delta.add_fact(key, "package:type", Atom.to_string(package.type))
@@ -41,5 +45,29 @@ defmodule Jarvis.Package do
 	defp scan({type, regex}, content) do
 		Regex.scan(regex, content)
 		|> Enum.map(&( %{type: type, number: List.first(&1)}))
+	end
+end
+
+defmodule Jarvis.Shippo do
+	@base "https://api.goshippo.com"
+
+	def status(number, carrier) do
+		get_data!("/tracks/#{carrier}/#{number}")
+	end
+
+	def track(number, carrier) do
+		post_data!("/tracks/", tracking_number: number, carrier: carrier)
+	end
+
+	def post_data!(url, params) do
+		url = @base <> url
+		HTTPoison.post!(url, {:form, params}, [{"Authorization", "ShippoToken shippo_test_81c18ad3ec5cd9bbce3614cc82a150bf8ab47750"}]).body
+		|> Poison.decode!
+	end
+
+	def get_data!(url) do
+		url = @base <> url
+		HTTPoison.get!(url, [{"Authorization", "ShippoToken shippo_test_81c18ad3ec5cd9bbce3614cc82a150bf8ab47750"}]).body
+		|> Poison.decode!
 	end
 end

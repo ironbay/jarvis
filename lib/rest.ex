@@ -7,6 +7,13 @@ defmodule Jarvis.Rest do
 	plug :match
 	plug :dispatch
 
+	post "/external/shippo" do
+		{:ok, data, _} = read_body(conn)
+		Poison.decode!(data, as: %{})
+		|> IO.inspect
+		send_resp(conn, 200, "ok")
+	end
+
 	get "/external/nylas/callback" do
 		conn = fetch_query_params(conn)
 		state = Map.get(conn.params, "state")
