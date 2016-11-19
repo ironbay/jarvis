@@ -15,7 +15,7 @@ defmodule Jarvis.Package do
 	def handle_cast_async({"package.list", _, context}, bot, data) do
 		user = Bot.call(bot, "user.who", %{}, context)
 		Delta.query_fact([
-			[:package],
+			[:account],
 			[:account, "user:key", user],
 			[:account, "context:type", "contextio"],
 			[:account, "email:key", :email],

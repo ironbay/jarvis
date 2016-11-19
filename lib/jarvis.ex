@@ -5,6 +5,7 @@ defmodule Jarvis do
 	# for more information on OTP Applications
 	def start(_type, _args) do
 		import Supervisor.Spec, warn: false
+		:syn.init
 		# Define workers and child supervisors to be supervised
 		children = [
 			# Starts a worker by calling: Bot.Worker.start_link(arg1, arg2, arg3)
