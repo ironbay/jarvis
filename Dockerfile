@@ -1,6 +1,7 @@
-FROM ironbay/elixir:master
+# FROM ironbay/elixir:master
+FROM ironbay/jarvis:elixir
 
-ADD . .
+ADD lib lib
 RUN mix deps.get
 RUN mix compile
 
