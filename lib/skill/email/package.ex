@@ -31,7 +31,7 @@ defmodule Jarvis.Package do
 		|> Enum.flat_map(&scan(&1, content))
 		|> Enum.uniq_by(&Map.get(&1, :number))
 		|> Enum.filter(fn package ->
-			Jarvis.Shippo.status(package.number, package.carrier)
+			Jarvis.Shippo.status(package.number, package.type)
 			|> Map.get("tracking_status") !== nil
 		end)
 		|> Enum.map(fn package ->
