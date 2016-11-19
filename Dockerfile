@@ -2,7 +2,7 @@
 FROM ironbay/jarvis:elixir
 
 ADD lib lib
-ADD mix.exs
+ADD mix.exs mix.exs
 RUN mix deps.get
 RUN mix compile
 
