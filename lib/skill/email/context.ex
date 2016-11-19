@@ -60,6 +60,8 @@ defmodule Jarvis.ContextIO.Register do
 			}
 		} = body
 		Delta.add_fact(account, "email:key", key)
+		Delta.add_fact(key, "email:from", from)
+		Delta.add_fact(key, "email:subject", subject)
 		Bot.cast(bot, "email", %{
 			content: content,
 			from: from,
