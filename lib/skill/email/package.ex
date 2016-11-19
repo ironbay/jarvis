@@ -38,6 +38,7 @@ defmodule Jarvis.Package do
 			Delta.add_fact(context.sender, "package:number", package.number)
 			Delta.add_fact(package.number, "package:type", Atom.to_string(package.type))
 			Delta.add_fact(package.number, "package:email", key)
+			Jarvis.Shippo.status(package.number, package.type)
 			Bot.cast(bot, "package", package, context)
 		end)
 		:ok
