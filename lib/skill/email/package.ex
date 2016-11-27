@@ -23,6 +23,7 @@ defmodule Jarvis.Package do
 				[:account, "email:key", :email],
 				[:email, "package:number", :package]
 			])
+			|> IO.inspect
 			|> Enum.map(&List.first/1)
 			|> Enum.join(",")
 		Bot.cast(bot, "bot.message", packages, context)
@@ -40,9 +41,8 @@ defmodule Jarvis.Package do
 			|> Map.get("tracking_status") !== nil
 		end)
 		|> Enum.map(fn package ->
-			Delta.add_fact(context.sender, "package:number", package.number)
+			Delta.add_fact(key, "package:number", package.number)
 			Delta.add_fact(package.number, "package:type", Atom.to_string(package.type))
-			Delta.add_fact(package.number, "package:email", key)
 			Jarvis.Shippo.track(package.number, package.type)
 			Bot.cast(bot, "package", package, context)
 		end)
