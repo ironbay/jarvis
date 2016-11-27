@@ -55,7 +55,7 @@ defmodule Jarvis.Rest do
 	end
 
 	def start_link do
-		{:ok, _} = Plug.Adapters.Cowboy.http __MODULE__, []
+		{:ok, _} = Plug.Adapters.Cowboy.http __MODULE__, [], port: 4001
 	end
 
 end

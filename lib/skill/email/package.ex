@@ -5,6 +5,7 @@ defmodule Jarvis.Package do
 		{:fedex, ~r/\d{15}/i},
 		{:fedex, ~r/\d{12}/i},
 		{:fedex, ~r/\d{20}/i},
+		{:ups, ~r/1Z.{16}/i}
 	]
 
 	def begin(bot, []) do
@@ -14,14 +15,17 @@ defmodule Jarvis.Package do
 
 	def handle_cast_async({"package.list", _, context}, bot, data) do
 		user = Bot.call(bot, "user.who", %{}, context)
-		Delta.query_fact([
-			[:account],
-			[:account, "user:key", user],
-			[:account, "context:type", "contextio"],
-			[:account, "email:key", :email],
-			[:email, "package:number", :package]
-		])
-		|> IO.inspect
+		packages =
+			Delta.query_fact([
+				[:package],
+				[:account, "user:key", user],
+				[:account, "context:type", "contextio"],
+				[:account, "email:key", :email],
+				[:email, "package:number", :package]
+			])
+			|> Enum.map(&List.first/1)
+			|> Enum.join(",")
+		Bot.cast(bot, "bot.message", packages, context)
 		:ok
 	end
 
