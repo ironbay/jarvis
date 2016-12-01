@@ -1,6 +1,6 @@
 defmodule Jarvis.Media.Download do
 	use Bot.Skill
-	@wait 0
+	@wait 1000 * 60
 	@key "c7afa073572a4ee09f8c"
 	@tv "/media/content/union/tv"
 	@downloaded "/media/torrents/downloaded"
