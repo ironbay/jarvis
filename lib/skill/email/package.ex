@@ -23,7 +23,6 @@ defmodule Jarvis.Package do
 				[:account, "email:key", :email],
 				[:email, "package:number", :package]
 			])
-			|> IO.inspect
 			|> Enum.map(&List.first/1)
 			|> Enum.join(",")
 		Bot.cast(bot, "bot.message", packages, context)
@@ -75,7 +74,6 @@ defmodule Jarvis.Shippo do
 	def get_data!(url) do
 		url = @base <> url
 		HTTPoison.get!(url, [{"Authorization", "ShippoToken shippo_test_81c18ad3ec5cd9bbce3614cc82a150bf8ab47750"}]).body
-		|> IO.inspect
 		|> Poison.decode!
 	end
 end
