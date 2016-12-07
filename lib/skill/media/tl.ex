@@ -28,7 +28,6 @@ defmodule Jarvis.Media.TL do
 
 	def handle_info({:received, data, _sender, _channel}, bot, state = %{client: client}) do
 		text = String.Chars.to_string(data)
-		IO.puts(text)
 		{:ok, regex} = Regex.compile("\\<(?P<category>.+)\\> Name:'(?P<name>[^']+)'.+http[^\\d]+(?P<id>\\d+)")
 		case Regex.named_captures(regex, text) do
 			data ->

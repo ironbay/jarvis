@@ -53,7 +53,7 @@ defmodule Jarvis.Proxy do
 		end
 
 		# Reddit
-		Bot.enable_skill(bot, Jarvis.Reddit.Link, [])
+		# Bot.enable_skill(bot, Jarvis.Reddit.Link, [])
 		Bot.enable_skill(bot, Jarvis.Reddit.Joke, [])
 		Bot.enable_skill(bot, Jarvis.Reddit.Poller, ["futurology"])
 
