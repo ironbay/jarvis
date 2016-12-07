@@ -48,7 +48,6 @@ defmodule Jarvis.Music do
 	end
 
 	def fact(data, url) do
-		IO.inspect(data)
 		%{
 			"source" => source,
 			"lookup" => %{

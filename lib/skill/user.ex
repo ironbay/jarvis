@@ -31,7 +31,7 @@ defmodule Bot.Skill.User do
 							Bot.cast(bot, "bot.message", "Looks like you're new, we've created a new account for you: #{key}", context)
 							Delta.add_fact(key, "user:email", email)
 							key
-						key -> key |> IO.inspect
+						key -> key
 					end
 
 				Delta.add_fact(sender, "context:type", type)
@@ -39,7 +39,6 @@ defmodule Bot.Skill.User do
 
 				Bot.cast(bot, "bot.user.success", %{}, context)
 			data ->
-				IO.inspect(data)
 				Bot.cast(bot, "bot.user.already", %{type: type},context)
 		end
 		:ok

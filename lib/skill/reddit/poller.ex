@@ -9,7 +9,7 @@ defmodule Jarvis.Reddit.Poller do
 		schedule(@interval)
 		{:ok, %{
 			subreddit: subreddit,
-			last: id,
+			last: nil,
 		}}
 	end
 

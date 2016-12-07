@@ -46,7 +46,6 @@ defmodule Jarvis.Gmail.Poller do
 	def handle_cast_async({"gmail.thread", id, context = %{sender: sender}}, bot, _state) do
 		{:ok, thread} = Gmail.User.thread(sender, id)
 		thread.messages
-		|> IO.inspect
 		|> Enum.flat_map(&(&1.payload.parts))
 		|> Enum.map(fn part ->
 			%{

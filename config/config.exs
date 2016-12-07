@@ -33,12 +33,5 @@ config :cqerl,
 	keyspace: "data",
 	protocol_version: 3
 
-config :gmail, :oauth2,
-	client_id: "735523450636-n5snetq0dt23btueebn3aet2e5dgq0pe.apps.googleusercontent.com",
-	client_secret: "yKcrmA4qFZ3TkB6j-U7BCbzS"
-
-config :gmail, :thread,
-  pool: 100
-
-config :gmail, :message,
-  pool: 100
+config :jarvis,
+	config: System.get_env("JARVIS_CONFIG") || "server.json"
