@@ -11,6 +11,7 @@ defmodule Jarvis do
 			# Starts a worker by calling: Bot.Worker.start_link(arg1, arg2, arg3)
 			worker(Jarvis.Proxy, []),
 			worker(Jarvis.Rest, []),
+			worker(Postgrex, [[hostname: "ovh.ironbay.digital", username: "postgres", password: "postgres", database: "postgres", name: :postgres]]),
 		]
 
 

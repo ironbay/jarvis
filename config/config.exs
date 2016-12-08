@@ -28,10 +28,6 @@ use Mix.Config
 # here (which is why it is important to import them last).
 #
 #     import_config "#{Mix.env}.exs"
-config :cqerl,
-	cassandra_nodes: ["cassandra"],
-	keyspace: "data",
-	protocol_version: 3
 
 config :jarvis,
 	config: System.get_env("JARVIS_CONFIG") || "server.json"

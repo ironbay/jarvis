@@ -47,14 +47,18 @@ defmodule Jarvis.Presence do
 
 	def ping(ips) do
 		ips
-		|> Enum.map(fn ip ->
-			{_, result} =
-				System.cmd("ping", [
-					"-c", "1",
-					"-W", "5",
-					ip,
-				])
-			{ip, result === 0}
+		|> ParallelStream.map(fn ip ->
+			count =
+				1..5
+				|> Enum.take_while(fn _ ->
+					{result, _} =
+						System.cmd("nmap", [
+							"-sn", ip,
+						])
+					!String.contains?(result, "1 host up")
+				end )
+				|> Enum.count
+			{ip, count < 3}
 		end)
 		|> Enum.into(%{})
 	end

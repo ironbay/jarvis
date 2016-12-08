@@ -5,14 +5,10 @@ defmodule Delta do
 	use Delta.Plugin.Watch
 	use Delta.Plugin.Fact
 
-	@interceptors [
-		Delta.Test.Interceptor
-	]
+	@read {Delta.Stores.Postgres, :postgres}
 
 	@writes [
-		{Delta.Stores.Cassandra, %{}}
+		{Delta.Stores.Postgres, :postgres}
 	]
-
-	@read {Delta.Stores.Cassandra, %{}}
 
 end
