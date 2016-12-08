@@ -24,7 +24,7 @@ defmodule Jarvis.Presence do
 			case {old, new} do
 				{true, false} -> Bot.cast(bot, "presence.inactive", ip, %{type: "network", sender: ip})
 				{false, true} -> Bot.cast(bot, "presence.active", ip, %{type: "network", sender: ip})
-				_ ->
+				_ -> :skip
 			end
 		end)
 		schedule(@interval)

@@ -14,12 +14,12 @@ defmodule Jarvis.Media.Chromecast do
 		:ok
 	end
 
-	def handle_call({"chromecast.speak", text, _context}, bot, %{ip: ip}) do
+	def handle_cast_async({"bot.broadcast", text, _context}, bot, %{ip: ip}) do
 		say(text, ip)
 		:ok
 	end
 
-	def handle_cast_async({"bot.broadcast", text, _context}, bot, %{ip: ip}) do
+	def handle_call({"chromecast.speak", text, _context}, bot, %{ip: ip}) do
 		say(text, ip)
 		:ok
 	end

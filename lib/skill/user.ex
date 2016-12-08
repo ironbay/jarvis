@@ -86,6 +86,7 @@ defmodule Bot.Skill.User do
 		Delta.query_fact([
 			[:key],
 			[sender, "user:key", :key],
+			[sender, "context:type", type],
 		])
 		|> List.first
 	end

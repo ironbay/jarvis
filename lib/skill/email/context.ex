@@ -10,11 +10,13 @@ defmodule Jarvis.ContextIO.Register do
 
 	def handle_cast_async({"contextio.register", _, context}, bot, _data) do
 		user = Bot.call(bot, "user.who", %{}, context)
-		case Delta.query_fact([
-			[:sender],
-			[:sender, "user:key", user],
-			[:sender, "context:type", "contextio"]
-		]) |> List.first do
+		case [
+				[:sender],
+				[:sender, "user:key", user],
+				[:sender, "context:type", "contextio"]
+			]
+			|> Delta.query_fact()
+			|> List.first do
 
 			nil ->
 				Bot.cast(bot, "bot.message", "What email would you like to register?", context)
@@ -74,7 +76,6 @@ defmodule Jarvis.ContextIO.Register do
 end
 
 defmodule Jarvis.ContextIO.Api do
-	use HTTPoison.Base
 
 	@base "https://api.context.io/2.0"
 	@creds OAuther.credentials(consumer_key: "ujc5wbrg", consumer_secret: "RNBLctrIfXwrbkvn")
@@ -83,21 +84,21 @@ defmodule Jarvis.ContextIO.Api do
 	def post_data!(url, body) do
 		url = @base <> url
 		{headers, params} =
-			OAuther.sign("post", url, body |> Enum.to_list, @creds)
+			"post"
+			|> OAuther.sign(url, body |> Enum.to_list, @creds)
 			|> OAuther.header
-		post!(url, {:form, params}, [headers], timeout: 30000).body
+		HTTPoison.post!(url, {:form, params}, [headers], timeout: 30_000).body
+		|> Poison.decode!
 	end
 
 	def get_data!(url, query \\ []) do
 		url = @base <> url
 		{headers, params} =
-			OAuther.sign("get", url, query |> Enum.to_list, @creds)
+			"get"
+			|> OAuther.sign(url, query |> Enum.to_list, @creds)
 			|> OAuther.header
-		get!(url, [headers], params: params, timeout: 30000).body
-	end
-
-	defp process_response_body(body) do
-		body
+		HTTPoison.get!(url, [headers], params: params, timeout: 30_000).body
 		|> Poison.decode!
 	end
+
 end
