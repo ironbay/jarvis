@@ -2,7 +2,7 @@
 FROM ironbay/jarvis:elixir
 
 ADD lib lib
-ADD config
+ADD config config
 ADD mix.exs mix.exs
 ADD mix.lock mix.lock
 RUN mix deps.get
