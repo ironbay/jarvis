@@ -49,6 +49,16 @@ defmodule Jarvis.Rest do
 		send_resp(conn, 200, "ok")
 	end
 
+	post "/cast" do
+		{:ok, data, _} = read_body(conn)
+		%{
+			"body" => body,
+			"action" => action,
+			"context" => context,
+		} = Poison.decode!(data, as: %{})
+		Bot.cast(:jarvis_bot, action, body, context)
+	end
+
 
 	get ":all" do
 		send_resp(conn, 200, "")

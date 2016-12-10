@@ -43,10 +43,9 @@ defmodule Jarvis.Presence do
 	def ping(ip) do
 		{_, code} =
 			System.cmd("bash", [
-				"-c", "ip -s -s neigh flush all && arp -an | grep #{ip} | grep incomplete",
+				"-c", "sudo arp-scan -l | grep #{ip}",
 			])
-			|> IO.inspect
-		code != 0
+		code == 0
 	end
 
 end

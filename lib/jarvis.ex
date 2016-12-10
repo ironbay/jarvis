@@ -6,6 +6,7 @@ defmodule Jarvis do
 	def start(_type, _args) do
 		import Supervisor.Spec, warn: false
 		config = read_config
+		Node.connect(:"jarvis@10.42.193.182")
 		:syn.init
 		# Define workers and child supervisors to be supervised
 		children = [
@@ -32,20 +33,20 @@ end
 
 defmodule Jarvis.Proxy do
 	use GenServer
+	@pid {:via, :syn, :jarvis_bot}
 
 	def start_link(config) do
 		GenServer.start_link(__MODULE__, [config])
 	end
 
 	def init([config]) do
-		{:ok, bot} = Bot.start_link(:jarvis_bot)
+		Bot.start_link(@pid)
 		config
 		|> Map.get(:skills)
 		|> Enum.each(fn %{module: module, args: args} ->
-			Bot.enable_skill(bot, String.to_existing_atom("Elixir." <> module), args)
+			Bot.enable_skill(@pid, String.to_existing_atom("Elixir." <> module), args)
 		end)
 
 		{:ok, []}
 	end
-
 end

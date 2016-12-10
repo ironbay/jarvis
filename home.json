@@ -1,0 +1,9 @@
+{
+	"skills": [{
+		"module": "Jarvis.Media.Chromecast",
+		"args": ["Home"]
+	}, {
+		"module": "Jarvis.Presence",
+		"args": ["192.168.1.251"]
+	}]
+}
