@@ -8,4 +8,4 @@ ADD mix.lock mix.lock
 RUN mix deps.get
 RUN mix compile
 
-CMD iex -S mix
+CMD iex --cookie server --name jarvis@100.33.127.192 -S mix

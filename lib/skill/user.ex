@@ -3,6 +3,7 @@ defmodule Bot.Skill.User do
 
 	def begin(bot, []) do
 		Bot.cast(bot, "regex.add", {"^register$", "user.register"})
+		Bot.cast(bot, "regex.add", {"^identify$", "user.identify"})
 		Bot.cast(bot, "regex.add", {"who am i", "user.who"})
 		Bot.cast(bot, "regex.add", {"my name is (?<name>.+)", "user.register.name"})
 		Bot.cast(bot, "regex.add", {"call me (?<name>.+)", "user.register.name"})
@@ -21,21 +22,20 @@ defmodule Bot.Skill.User do
 
 	def handle_cast_async({"user.register", _body, context = %{type: type, sender: sender}}, bot, _data) do
 		case from_context(context) do
+			# If unregistered
 			nil ->
+				# Ask for email
 				Bot.cast(bot, "bot.register.email", %{}, context)
 				{_, %{raw: email}, _} = Bot.wait(bot, context, ["chat.email"])
 				key =
 					case from_email(email) do
-						nil ->
-							key = Delta.UUID.ascending()
-							Bot.cast(bot, "bot.message", "Looks like you're new, we've created a new account for you: #{key}", context)
-							Delta.add_fact(key, "user:email", email)
-							key
+						# Create a new user
+						nil -> create_user(bot, email, context)
 						key -> key
 					end
-
-				Delta.add_fact(sender, "context:type", type)
-				Delta.add_fact(sender, "user:key", key)
+					IO.inspect(key)
+				identify(bot, context)
+				|> register_context(key)
 
 				Bot.cast(bot, "bot.user.success", %{}, context)
 			data ->
@@ -44,49 +44,47 @@ defmodule Bot.Skill.User do
 		:ok
 	end
 
-	def handle_cast_async({"user.register.name", %{name: name}, context}, bot, _data) do
-		case from_context(context) do
-			nil -> :skip
-			[key] ->
-				Delta.add_fact(key, "user:name", name)
-				Bot.cast(bot, "bot.ack", %{}, context)
-		end
-		:ok
-	end
-
-
-	def handle_cast_async({"user.register.phone", %{number: number}, context}, bot, _data) do
-		case from_context(context) do
-			nil -> :skip
-			{key, name} ->
-				Bot.cast(bot, "bot.message", "#{name || "Hey"}, is #{number} your number?", context)
-				case Bot.wait(bot, context, ["chat.yes", "chat.no"]) do
-					{"chat.no", _, _} -> :skip
-						Bot.cast(bot, "bot.rejected", %{}, context)
-					{"chat.yes", _, _} ->
-						Delta.add_fact(key, "user:phone", number)
-						Bot.cast(bot, "bot.success", %{}, context)
-				end
-		end
-		:ok
-	end
-
-	def handle_call({"user.who", _body, context}, bot, _data) do
-		[key] = from_context(context)
-		{:ok, key}
-	end
-
 	def handle_cast({"user.who", _body, context}, bot, _data) do
 		[key] = from_context(context)
 		Bot.cast(bot, "bot.message", "#{key}", context)
 		:ok
 	end
 
-	defp from_context(%{type: type, sender: sender}) do
-		Delta.query_fact([
+	def handle_call({"user.who", context, _}, bot, _data) do
+		{:reply, from_context(context) |> List.first}
+	end
+
+	def handle_cast({"user.identify", _body, context}, bot, _data) do
+		Bot.cast(bot, "bot.message", inspect(identify(bot, context)), context)
+		:ok
+	end
+
+	defp create_user(bot, email, context) do
+		key = Delta.UUID.ascending()
+		Bot.cast(bot, "bot.message", "Looks like you're new, we've created a new account for you: #{key}", context)
+		Delta.add_fact(key, "user:email", email)
+		key
+	end
+
+	defp register_context(context, user) do
+		{sender, rest} = Map.pop(context, :sender)
+		Delta.add_fact(sender, "user:key", user)
+		rest
+		|> Enum.each(fn {key, value} ->
+			Delta.add_fact(sender, "context:#{key}", value)
+		end)
+	end
+
+	defp identify(bot, context) do
+		Bot.call(bot, "user.identify", context)
+	end
+
+	defp from_context(%{sender: sender}) do
+		[
 			[:key],
 			[sender, "user:key", :key],
-		])
+		]
+		|> Delta.query_fact
 		|> List.first
 	end
 
@@ -95,7 +93,7 @@ defmodule Bot.Skill.User do
 			[:key],
 			[:key, "user:email", email]
 		])
-		|> List.zip
+		|> List.first
 		|> List.first
 	end
 
