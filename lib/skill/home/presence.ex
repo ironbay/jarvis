@@ -45,6 +45,7 @@ defmodule Jarvis.Presence do
 			System.cmd("bash", [
 				"-c", "sudo arp-scan -l | grep #{ip}",
 			])
+			|> IO.inspect
 		code == 0
 	end
 

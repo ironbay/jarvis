@@ -4,6 +4,8 @@ defmodule Jarvis.Rest do
 	import Plug.Conn.Utils
 	alias Delta.Dynamic
 
+	@pid {:via, :syn, :jarvis_bot}
+
 	plug :match
 	plug :dispatch
 
@@ -17,7 +19,7 @@ defmodule Jarvis.Rest do
 	get "/external/nylas/callback" do
 		conn = fetch_query_params(conn)
 		state = Map.get(conn.params, "state")
-		Bot.cast(:jarvis_bot, "nylas.callback", conn.params, %{type: "nylas", channel: state})
+		Bot.cast(@pid, "nylas.callback", conn.params, %{type: "nylas", channel: state})
 		send_resp(conn, 200, "ok")
 	end
 
@@ -30,21 +32,21 @@ defmodule Jarvis.Rest do
 		{:ok, data, _} = read_body(conn)
 		Poison.decode!(data, as: %{})
 		|> Map.get("deltas")
-		|> Enum.each(&Bot.cast(:jarvis_bot, "nylas.delta", &1, %{type: "nylas", sender: Dynamic.get(&1, ["object_data", "account_id"])}))
+		|> Enum.each(&Bot.cast(@pid, "nylas.delta", &1, %{type: "nylas", sender: Dynamic.get(&1, ["object_data", "account_id"])}))
 		send_resp(conn, 200, "ok")
 	end
 
 	get "/external/contextio/callback" do
 		conn = fetch_query_params(conn)
 		token = Map.get(conn.params, "contextio_token")
-		Bot.cast(:jarvis_bot, "contextio.callback", token, %{type: "contextio", sender: token})
+		Bot.cast(@pid, "contextio.callback", token, %{type: "contextio", sender: token})
 		send_resp(conn, 200, "ok")
 	end
 
 	post "/external/contextio/hook" do
 		{:ok, data, _} = read_body(conn)
 		message = Poison.decode!(data, as: %{})
-		Bot.cast(:jarvis_bot, "contextio.message", message)
+		Bot.cast(@pid, "contextio.message", message)
 
 		send_resp(conn, 200, "ok")
 	end
@@ -56,7 +58,7 @@ defmodule Jarvis.Rest do
 			"action" => action,
 			"context" => context,
 		} = Poison.decode!(data, as: %{})
-		Bot.cast(:jarvis_bot, action, body, context)
+		Bot.cast(@pid, action, body, context)
 	end
 
 

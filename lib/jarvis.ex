@@ -6,20 +6,21 @@ defmodule Jarvis do
 	def start(_type, _args) do
 		import Supervisor.Spec, warn: false
 		config = read_config
-		Node.connect(:"jarvis@10.42.193.182")
+		Node.connect(:"jarvis@10.42.144.170")
 		:syn.init
 		# Define workers and child supervisors to be supervised
 		children = [
 			# Starts a worker by calling: Bot.Worker.start_link(arg1, arg2, arg3)
-			worker(Jarvis.Proxy, [config]),
-			worker(Jarvis.Rest, []),
 			worker(Postgrex, [[hostname: "ovh.ironbay.digital", username: "postgres", password: "postgres", database: "postgres", name: :postgres]]),
+			worker(Jarvis.Rest, []),
+			supervisor(Bot.Skill.Supervisor, [[name: :skills]]),
+			worker(Jarvis.Bootstrap, [config]),
 		]
 
 
 		# See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
 		# for other strategies and supported options
-		opts = [strategy: :one_for_one, name: Jarvis]
+		opts = [strategy: :rest_for_one, name: Jarvis]
 		Supervisor.start_link(children, opts)
 	end
 
@@ -31,7 +32,7 @@ defmodule Jarvis do
 	end
 end
 
-defmodule Jarvis.Proxy do
+defmodule Jarvis.Bootstrap do
 	use GenServer
 	@pid {:via, :syn, :jarvis_bot}
 
@@ -40,11 +41,10 @@ defmodule Jarvis.Proxy do
 	end
 
 	def init([config]) do
-		Bot.start_link(@pid)
 		config
 		|> Map.get(:skills)
 		|> Enum.each(fn %{module: module, args: args} ->
-			Bot.enable_skill(@pid, String.to_existing_atom("Elixir." <> module), args)
+			Bot.Skill.Supervisor.enable_skill(:skills, :jarvis_bot, String.to_existing_atom("Elixir." <> module), args)
 		end)
 
 		{:ok, []}
