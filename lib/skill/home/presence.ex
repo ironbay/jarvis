@@ -7,7 +7,6 @@ defmodule Jarvis.Presence do
 	end
 
 	def handle_cast_async({"wifi.connect", _, context}, bot, data) do
-		IO.inspect("LALALAL")
 		Bot.call(bot, "chromecast.speak", "Welcome home", context)
 		:ok
 	end
