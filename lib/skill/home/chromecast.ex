@@ -1,10 +1,11 @@
 defmodule Jarvis.Media.Chromecast do
 	use Bot.Skill
 
-	def begin(bot, [ip]) do
+	def begin(bot, [network, ip]) do
 		Bot.cast(bot, "regex.add", {"cast speech (?P<text>.+)", "chromecast.speech"})
 		{:ok, %{
 			ip: ip,
+			network: network,
 		}}
 	end
 
