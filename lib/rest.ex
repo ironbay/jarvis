@@ -4,7 +4,7 @@ defmodule Jarvis.Rest do
 	import Plug.Conn.Utils
 	alias Delta.Dynamic
 
-	@pid {:via, :syn, :jarvis_bot}
+	@pid :jarvis_bot
 
 	plug :match
 	plug :dispatch
@@ -57,8 +57,9 @@ defmodule Jarvis.Rest do
 			"body" => body,
 			"action" => action,
 			"context" => context,
-		} = Poison.decode!(data, as: %{})
+		} = Poison.decode!(data, as: %{}) |> IO.inspect
 		Bot.cast(@pid, action, body, context)
+		send_resp(conn, 200, "ok")
 	end
 
 

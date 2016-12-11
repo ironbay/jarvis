@@ -4,6 +4,6 @@
 		"args": ["dax-home", "Home"]
 	}, {
 		"module": "Jarvis.Presence",
-		"args": ["dax-home", "192.168.1.251"]
+		"args": ["dax-home"]
 	}]
 }

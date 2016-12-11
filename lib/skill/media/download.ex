@@ -29,7 +29,7 @@ defmodule Jarvis.Media.Download do
 	end
 
 	def handle_cast_async({"torrent.search", %{query: query}, context}, bot, data) do
-		options = "https://www.torrentleech.org/torrents/browse/index/query/#{query}/categories/10%2C11%2C13%2C14%2C36%2C37%2C41%2C43%2C32/orderby/leechers/order/desc"
+		options = "https://classic.torrentleech.org/torrents/browse/index/query/#{query}/categories/10%2C11%2C13%2C14%2C36%2C37%2C41%2C43%2C32/orderby/leechers/order/desc"
 		|> HTTPoison.get!(%{}, hackney: [cookie: [@cookies]])
 		|> Map.get(:body)
 		|> Floki.find("#torrenttable tbody tr")
@@ -59,7 +59,7 @@ defmodule Jarvis.Media.Download do
 
 	def handle_call({"torrent.download", %{id: id, name: name}, _context}, bot, data) do
 		body =
-			"https://www.torrentleech.org/rss/download/#{id}/#{@key}/#{name}"
+			"https://classic.torrentleech.org/rss/download/#{id}/#{@key}/#{name}"
 			|> HTTPoison.get!
 			|> Map.get(:body)
 		File.write!("#{@downloaded}/#{name}.torrent", body)

@@ -6,7 +6,7 @@ defmodule Jarvis do
 	def start(_type, _args) do
 		import Supervisor.Spec, warn: false
 		config = read_config
-		Node.connect(:"jarvis@10.42.144.170")
+		Node.connect(:"jarvis@10.42.191.122")
 		:syn.init
 		# Define workers and child supervisors to be supervised
 		children = [
@@ -34,7 +34,6 @@ end
 
 defmodule Jarvis.Bootstrap do
 	use GenServer
-	@pid {:via, :syn, :jarvis_bot}
 
 	def start_link(config) do
 		GenServer.start_link(__MODULE__, [config])
