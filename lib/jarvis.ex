@@ -6,7 +6,7 @@ defmodule Jarvis do
 	def start(_type, _args) do
 		import Supervisor.Spec, warn: false
 		config = read_config
-		Node.connect(:"jarvis@10.42.191.122")
+		Node.connect(:"jarvis@10.42.105.192")
 		:syn.init
 		# Define workers and child supervisors to be supervised
 		children = [

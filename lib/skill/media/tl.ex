@@ -31,6 +31,7 @@ defmodule Jarvis.Media.TL do
 		{:ok, regex} = Regex.compile("\\<(?P<category>.+)\\> Name:'(?P<name>[^']+)'.+http[^\\d]+(?P<id>\\d+)")
 		case Regex.named_captures(regex, text) do
 			data ->
+				IO.inspect(data)
 				parsed = for {key, val} <- data, into: %{}, do: {String.to_atom(key), val}
 				Bot.cast(bot, "torrent.upload", parsed)
 		end
