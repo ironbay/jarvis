@@ -59,7 +59,7 @@ defmodule Jarvis.Media.Download do
 
 	def handle_call({"torrent.download", %{id: id, name: name}, _context}, bot, data) do
 		body =
-			"https://classic.torrentleech.org/rss/download/#{id}/#{@key}/#{name}"
+			"https://www.torrentleech.org/rss/download/#{id}/#{@key}/#{name}"
 			|> HTTPoison.get!
 			|> Map.get(:body)
 		File.write!("#{@downloaded}/#{name}.torrent", body)
