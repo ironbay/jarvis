@@ -70,7 +70,7 @@ defmodule Jarvis.Link do
 		|> Stream.filter(&is_og?/1)
 		|> Stream.map(&pull_og/1)
 		|> Enum.reduce(%{}, fn {key, value}, collect ->
-			path = String.split(key, ":")
+			path = String.split(key, "disabled")
 			value =
 				case Integer.parse(value) do
 					{digit, _}  -> digit
