@@ -39,11 +39,15 @@ defmodule Jarvis.Link do
 			|> clean_mime
 		graph =
 			body
-			|> find_og
+			|> pull_meta("og", "property")
+		twitter =
+			body
+			|> pull_meta("twitter", "name")
 		%{
 			url: Map.get(graph, "url") || url,
 			mime: mime,
 			graph: graph,
+			twitter: twitter,
 		}
 	end
 
@@ -64,39 +68,40 @@ defmodule Jarvis.Link do
 		end
 	end
 
-	def find_og(body) do
+	def pull_meta(body, prefix, key) do
 		body
-		|> Floki.find(~s(meta[property]))
-		|> Stream.filter(&is_og?/1)
-		|> Stream.map(&pull_og/1)
+		|> Floki.find(~s(meta[#{key}]))
+		|> Stream.filter(&is_prefix?(&1, prefix, key))
+		|> Stream.map(&pull_property(&1, prefix, key))
 		|> Enum.reduce(%{}, fn {key, value}, collect ->
 			path = String.split(key, "disabled")
 			value =
 				case Integer.parse(value) do
-					{digit, []}  -> digit
+					{digit, ""}  -> digit
 					_ -> value
 				end
 			Dynamic.put(collect, path, value)
 		end)
 	end
 
-	def pull_og(item) do
+	def pull_property(item, prefix, key) do
+		length = String.length(prefix) + 1
 		{
 			item
-			|> Floki.attribute("property")
+			|> Floki.attribute(key)
 			|> List.first
-			|> String.slice(3..-1),
+			|> String.slice(length..-1),
 			item
 			|> Floki.attribute("content")
 			|> List.first
 		}
 	end
 
-	def is_og?(item) do
+	def is_prefix?(item, prefix, key) do
 		item
-		|> Floki.attribute("property")
+		|> Floki.attribute(key)
 		|> List.first
-		|> String.starts_with?("og")
+		|> String.starts_with?(prefix)
 	end
 
 end
