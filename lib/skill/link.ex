@@ -1,91 +1,69 @@
 defmodule Jarvis.Link do
 	use Bot.Skill
+	alias Delta.Mutation
+	alias Delta.UUID
 
 	def begin(bot, []) do
-		Bot.cast(bot, "regex.add", {"link history", "link.history"})
-		Bot.cast(bot, "regex.add", {"^my links$", "link.mine"})
-		Bot.cast(bot, "regex.add", {"^what do I like$", "link.analysis"})
-		Bot.cast(bot, "regex.add", {"links about (?<tag>.+) from here", "link.search.channel"})
-		{:ok, {}}
+		Bot.call(bot, "regex.add", {"(?P<url>http[^\\s|\\|\\>]+)", "link.raw"})
+		{:ok, %{}}
 	end
 
-	def handle_cast_async({"link.direct", %{url: url}, %{sender: sender, type: type, channel: channel}}, bot, _data) do
-		Delta.add_fact(sender, "share:url", url)
-		Delta.add_fact(channel, "contains:url", url)
+	def handle_cast_async({"link.raw", %{url: url}, context}, bot, data) do
+		data = url |> clean_url
+		Bot.cast(bot, "link.clean", data, context)
 		:ok
 	end
 
-	def handle_cast_async({"graph", body = %{type: type, url: url}, _context}, bot, _data) do
-		Delta.add_fact(url, "og:type", type)
-		Delta.add_fact(url, "og:image", body.image)
-		Delta.add_fact(url, "og:title", body.title)
+	def handle_cast_async({"link.clean", %{url: url, mime: mime}, context}, bot, data) do
+		key = UUID.ascending()
+		Delta.merge(["link:shares", key], %{
+			key: key,
+			url: url,
+			mime: mime,
+			context: context,
+		})
 		:ok
 	end
 
-	def handle_cast_async({"link.tags", %{url: url, tags: tags }, _context}, bot, _data) do
-		Enum.each(tags, fn(tag) ->
-			tag = String.downcase(tag)
-			Delta.add_fact(url, "og:tag", tag)
-		end)
-		:ok
+	defp clean_url(url) do
+		%{
+			body: body,
+			headers: headers,
+		} = HTTPoison.request!(:get, url, "", [], [hackney: [{:follow_redirect, true}]])
+
+		mime =
+			headers
+			|> get_mime
+			|> clean_mime
+		url = find_url(body) || url
+		%{
+			url: url,
+			mime: mime,
+		}
 	end
 
-	def handle_cast({"link.history", _, context = %{channel: channel}}, bot, _data) do
-		Delta.query_fact([
-			[:url],
-			[channel, "contains:url", :url]
-		])
-		|> Enum.each(fn x ->
-			Bot.cast(bot, "bot.message", x, context)
-		end)
-		:ok
+	def get_mime(headers) do
+		case Enum.find(headers, nil, fn {header, _} -> header == "Content-Type" end) do
+			nil -> nil
+			{_, type} -> type
+		end
 	end
 
-	def handle_cast({"link.mine", _, context = %{channel: channel}}, bot, _data) do
-		user = Bot.call(bot, "user.who", %{}, context)
-		Delta.query_fact([
-			[:url],
-			[:sender, "user:key", user],
-			[:sender, "share:url", :url]
-		])
-		|> Enum.flat_map(&(&1))
-		|> Enum.each(fn x ->
-			Bot.cast(bot, "bot.message", x, context)
-		end)
-		:ok
+	def clean_mime(type) do
+		case type do
+			nil -> nil
+			type ->
+				type
+				|> String.split(";")
+				|> List.first
+		end
 	end
 
-	def handle_cast({"link.analysis", _, context = %{channel: channel}}, bot, _data) do
-		user = Bot.call(bot, "user.who", %{}, context)
-		Delta.query_fact([
-			[:tag],
-			[:sender, "user:key", user],
-			[:sender, "share:url", :url],
-			[:url, "og:tag", :tag],
-		])
-		|> Enum.flat_map(&(&1))
-		|> Enum.group_by(&(&1))
-		|> Enum.map(fn {key, value} -> {key, Enum.count(value)} end)
-		|> Enum.filter(fn {key, value} -> value > 1 end)
-		|> Enum.sort_by(fn {key, value} -> value end, &Kernel.>=/2)
-		|> Enum.take(5)
-		|> Enum.each(fn {x, count} ->
-			Bot.cast(bot, "bot.message", "#{x} - #{count}", context)
-		end)
-		:ok
-	end
-
-
-	def handle_cast({"link.search.channel", %{tag: tag}, context = %{channel: channel}}, bot, _data) do
-		Delta.query_fact([
-			[:url],
-			[:url, "og:tag", tag],
-			[channel, "contains:url", :url]
-		])
-		|> Enum.each(fn x ->
-			Bot.cast(bot, "bot.message", x, context)
-		end)
-		:ok
+	def find_url(body) do
+		body
+		|> Floki.find(~s([property="og:url"]))
+		|> Floki.attribute("content")
+		|> Enum.at(0)
 	end
 
 end

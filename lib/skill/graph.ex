@@ -2,16 +2,10 @@ defmodule Jarvis.Graph do
 	use Bot.Skill
 
 	def begin(bot, args) do
-		{:ok, neo} = Neo4j.Sips.start_link(url: "http://neo.ironbay.digital", basic_auth: [
-			username: "neo4j",
-			password: "9TcGy$w55]NmAv@#F,"
-		])
-		{:ok, %{
-			neo: neo
-		}}
+		{:ok, {}}
 	end
 
-	def handle_call({"graph.node", node, _context}, bot, data = %{neo: neo}) do
+	def handle_call({"graph.node", node, _context}, bot, data) do
 		cypher = """
 			MERGE (node:Node { key: {node}.key} })
 			ON CREATE SET node.props += {node}, node.created = TIMESTAMP()
@@ -22,7 +16,7 @@ defmodule Jarvis.Graph do
 		:ok
 	end
 
-	def handle_call({"graph.triple", body = %{nodes: nodes, edges: edges}, _context}, bot, data = %{neo: neo}) do
+	def handle_call({"graph.triple", body = %{nodes: nodes, edges: edges}, _context}, bot, data) do
 		params =
 			nodes
 			|> Enum.map(fn {key, node} -> {key, build(node)} end)
