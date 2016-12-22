@@ -43,6 +43,7 @@ defmodule Jarvis.Link do
 		twitter =
 			body
 			|> pull_meta("twitter", "name")
+			|> Map.merge(pull_meta(body, "twitter", "property"))
 		%{
 			url: Map.get(graph, "url") || url,
 			mime: mime,
