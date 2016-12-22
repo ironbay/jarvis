@@ -1,6 +1,7 @@
 defmodule Jarvis.Link do
 	use Bot.Skill
 	alias Delta.Mutation
+	alias Delta.Dynamic
 	alias Delta.UUID
 
 	def begin(bot, []) do
@@ -9,19 +10,20 @@ defmodule Jarvis.Link do
 	end
 
 	def handle_cast_async({"link.raw", %{url: url}, context}, bot, data) do
-		data = url |> clean_url
+		data =
+			url
+			|> clean_url
+			|> Map.put(:key, UUID.descending)
 		Bot.cast(bot, "link.clean", data, context)
 		:ok
 	end
 
-	def handle_cast_async({"link.clean", %{url: url, mime: mime}, context}, bot, data) do
-		key = UUID.ascending()
-		Delta.merge(["link:shares", key], %{
-			key: key,
-			url: url,
-			mime: mime,
-			context: context,
-		})
+	def handle_cast_async({"link.clean", body = %{key: key}, context}, bot, data) do
+		Delta.merge(["link:shares", key],
+			body
+			|> Map.put(:context, context)
+			|> Map.put(:created, :os.system_time(:millisecond))
+		)
 		:ok
 	end
 
@@ -35,10 +37,13 @@ defmodule Jarvis.Link do
 			headers
 			|> get_mime
 			|> clean_mime
-		url = find_url(body) || url
+		graph =
+			body
+			|> find_og
 		%{
-			url: url,
+			url: Map.get(graph, "url") || url,
 			mime: mime,
+			graph: graph,
 		}
 	end
 
@@ -59,11 +64,39 @@ defmodule Jarvis.Link do
 		end
 	end
 
-	def find_url(body) do
+	def find_og(body) do
 		body
-		|> Floki.find(~s([property="og:url"]))
-		|> Floki.attribute("content")
-		|> Enum.at(0)
+		|> Floki.find(~s(meta[property]))
+		|> Stream.filter(&is_og?/1)
+		|> Stream.map(&pull_og/1)
+		|> Enum.reduce(%{}, fn {key, value}, collect ->
+			path = String.split(key, ":")
+			value =
+				case Integer.parse(value) do
+					{digit, _}  -> digit
+					_ -> value
+				end
+			Dynamic.put(collect, path, value)
+		end)
+	end
+
+	def pull_og(item) do
+		{
+			item
+			|> Floki.attribute("property")
+			|> List.first
+			|> String.slice(3..-1),
+			item
+			|> Floki.attribute("content")
+			|> List.first
+		}
+	end
+
+	def is_og?(item) do
+		item
+		|> Floki.attribute("property")
+		|> List.first
+		|> String.starts_with?("og")
 	end
 
 end

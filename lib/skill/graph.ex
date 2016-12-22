@@ -5,41 +5,8 @@ defmodule Jarvis.Graph do
 		{:ok, {}}
 	end
 
-	def handle_call({"graph.node", node, _context}, bot, data) do
-		cypher = """
-			MERGE (node:Node { key: {node}.key} })
-			ON CREATE SET node.props += {node}, node.created = TIMESTAMP()
-		"""
-		Neo4j.Sips.query(Neo4j.Sips.conn, cypher, %{
-			node: build(node)
-		})
-		:ok
-	end
+	def handle_cast_async("link.clean", %{url: url, mime: mime}, state) do
 
-	def handle_call({"graph.triple", body = %{nodes: nodes, edges: edges}, _context}, bot, data) do
-		params =
-			nodes
-			|> Enum.map(fn {key, node} -> {key, build(node)} end)
-			|> Enum.into(%{})
-		create_nodes =
-			nodes
-			|> Enum.map(fn {key, node} ->
-				"""
-					MERGE (#{key}:Node { key: {#{key}}.key })
-					ON CREATE SET #{key} += {#{key}}, #{key}.created = TIMESTAMP()
-				"""
-			end)
-			|> Enum.join("\n")
-		create_edges =
-			edges
-			|> Enum.map(fn [subject, pred, object] ->
-				"""
-					MERGE (#{subject})-[:#{pred}]->(#{object})
-				"""
-			end)
-			|> Enum.join("\n")
-		cypher = Enum.join([create_nodes, create_edges], "\n")
-		Neo4j.Sips.query(Neo4j.Sips.conn, cypher, params)
 		:ok
 	end
 

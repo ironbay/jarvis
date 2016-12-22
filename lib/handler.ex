@@ -9,6 +9,7 @@ defmodule Jarvis.Handler do
 	end
 
 	def init([socket]) do
+		IO.puts("New connection")
 		Delta.watch([])
 		{:ok, %{
 			user: "delta-master",
