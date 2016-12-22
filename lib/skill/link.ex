@@ -73,8 +73,8 @@ defmodule Jarvis.Link do
 			path = String.split(key, "disabled")
 			value =
 				case Integer.parse(value) do
-					{digit, _}  -> digit
 					_ -> value
+					# {digit, _}  -> digit
 				end
 			Dynamic.put(collect, path, value)
 		end)
