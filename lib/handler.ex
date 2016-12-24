@@ -50,10 +50,10 @@ defmodule Jarvis.Handler do
 	end
 
 	def handle_command("delta.query", body, state = %{user: user}) do
-		%{merge: merge, delete: delete} = Delta.query(user, body)
+		result = Delta.query(user, body)
 		{:reply, %{
-			"$merge": merge,
-			"$delete": delete,
+			"$merge": Map.get(result, :merge) || %{},
+			"$delete": Map.get(result, :delete) || %{},
 		}, state}
 	end
 
