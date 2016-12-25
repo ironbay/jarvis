@@ -19,7 +19,7 @@ defmodule Jarvis.Link do
 	end
 
 	def handle_cast_async({"link.clean", body = %{url: url}, context}, bot, data) do
-		key = UUID.ascending()
+		key = UUID.descending()
 		hierarchy = Bot.call(bot, "context.path", context)
 		mutation =
 			Mutation.new
