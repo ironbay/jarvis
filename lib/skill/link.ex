@@ -18,12 +18,27 @@ defmodule Jarvis.Link do
 		:ok
 	end
 
-	def handle_cast_async({"link.clean", body = %{key: key}, context}, bot, data) do
-		Delta.merge(["link:shares", key],
-			body
-			|> Map.put(:context, context)
-			|> Map.put(:created, :os.system_time(:millisecond))
-		)
+	def handle_cast_async({"link.clean", body = %{url: url}, context}, bot, data) do
+		key = UUID.ascending()
+		hierarchy = Bot.call(bot, "context.path", context)
+		mutation =
+			Mutation.new
+			|> Mutation.merge(["link:info", url], body)
+		{_, mutation} =
+			hierarchy
+			|> Enum.reduce({[], mutation}, fn item, {path, mutation} ->
+				path = path ++ [item]
+				{
+					path,
+					mutation
+					|> Mutation.merge(["context:links", Enum.join(path, ":"), key], %{
+						key: key,
+						url: url,
+						created: :os.system_time(:millisecond)
+					})
+				}
+			end)
+		Delta.mutation(mutation)
 		:ok
 	end
 

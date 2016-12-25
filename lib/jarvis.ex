@@ -11,7 +11,7 @@ defmodule Jarvis do
 		# Define workers and child supervisors to be supervised
 		children = [
 			# Starts a worker by calling: Bot.Worker.start_link(arg1, arg2, arg3)
-			worker(Postgrex, [[hostname: "jarvis-postgres", username: "postgres", password: "postgres", database: "postgres", name: :postgres]]),
+			worker(Postgrex, [[hostname: "10.42.16.225", username: "postgres", password: "postgres", database: "postgres", name: :postgres]]),
 			worker(Jarvis.Rest, []),
 			supervisor(Bot.Skill.Supervisor, [[name: :skills]]),
 			worker(Jarvis.Bootstrap, [config]),
