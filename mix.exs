@@ -30,8 +30,8 @@ defmodule Jarvis.Mixfile do
   defp deps do
     [
 		{:httpoison, "~> 0.8.0"},
-		{:bot, path: "~/dev/ironbay/bot"},
-		# {:bot, git: "https://github.com/ironbay/bot.git"},
+		# {:bot, path: "~/dev/ironbay/bot"},
+		{:bot, git: "https://github.com/ironbay/bot.git"},
 		{:oauther, "~> 1.0.1"},
 		{:sweet_xml, "~> 0.6.1"},
 		{:exirc, "~> 0.11.0"},
