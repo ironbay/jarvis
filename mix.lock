@@ -1,4 +1,4 @@
-%{"bot": {:git, "https://github.com/ironbay/bot.git", "347d77881cf2fdda386471eea57e52709fbc8fca", []},
+%{"bot": {:git, "https://github.com/ironbay/bot.git", "a582e1374251a1069a90602feee0526b357fc87f", []},
   "bunt": {:hex, :bunt, "0.1.6", "5d95a6882f73f3b9969fdfd1953798046664e6f77ec4e486e6fafc7caad97c6f", [:mix], []},
   "certifi": {:hex, :certifi, "0.4.0", "a7966efb868b179023618d29a407548f70c52466bf1849b9e8ebd0e34b7ea11f", [:rebar3], []},
   "con_cache": {:hex, :con_cache, "0.11.1", "acbe5a1d10c47faba30d9629c9121e1ef9bca0aa5eddbb86f4e777bd9f9f9b6f", [:mix], [{:exactor, "~> 2.2.0", [hex: :exactor, optional: false]}]},
