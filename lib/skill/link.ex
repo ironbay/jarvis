@@ -34,7 +34,8 @@ defmodule Jarvis.Link do
 					|> Mutation.merge(["context:links", Enum.join(path, ":"), key], %{
 						key: key,
 						url: url,
-						created: :os.system_time(:millisecond)
+						created: :os.system_time(:millisecond),
+						context: context,
 					})
 				}
 			end)
