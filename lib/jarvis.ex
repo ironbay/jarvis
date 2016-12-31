@@ -23,7 +23,7 @@ defmodule Jarvis do
 			worker(Jarvis.Rest, []),
 			supervisor(Bot.Skill.Supervisor, [[name: :skills]]),
 			worker(Jarvis.Bootstrap, [config]),
-			worker(Delta.Server, [Jarvis.Handler, 12000]),
+			Delta.server_spec(12000),
 		]
 
 

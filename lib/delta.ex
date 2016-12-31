@@ -4,6 +4,7 @@ defmodule Delta do
 	use Delta.Plugin.Query
 	use Delta.Plugin.Watch
 	use Delta.Plugin.Fact
+	use Jarvis.Plugin
 
 	@read {Delta.Stores.Postgres, :postgres}
 
