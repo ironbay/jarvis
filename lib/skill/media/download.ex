@@ -76,11 +76,20 @@ defmodule Jarvis.Media.Download do
 				data
 				|> Floki.attribute("id")
 				|> List.first,
+			seeders:
+				data
+				|> Floki.find(".seeders")
+				|> Floki.text,
+			size:
+				data
+				|> Floki.find("td")
+				|> Enum.at(4)
+				|> Floki.text,
 		}
 	end
 
 	defp format(index, item) do
-		"#{index}. #{item.name}"
+		"#{index}. #{item.name} (#{item.size}) (#{item.seeders} seeders)"
 	end
 
 end
