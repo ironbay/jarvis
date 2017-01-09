@@ -9,6 +9,7 @@ defmodule Jarvis.Media.Download do
 	def begin(bot, args) do
 		Bot.cast(bot, "regex.add", {"^download (?P<query>.+)", "torrent.search"})
 		Bot.cast(bot, "regex.add", {"^(?P<number>\\d+)$", "chat.number"})
+		Bot.cast(bot, "regex.add", {"https://www.torrentleech.org/torrent/(?P<id>\\d+)", "torrent.link"})
 		{:ok, %{}}
 	end
 
@@ -55,6 +56,12 @@ defmodule Jarvis.Media.Download do
 				Bot.cast(bot, "bot.message", "Downloading #{item.name}", context)
 		end
 		:ok
+	end
+
+	def handle_cast_async({"torrent.link", %{id: id}, context}, bot, data) do
+		Bot.cast(bot, "bot.message", "Downloading #{id}", context)
+		Bot.call(bot, "torrent.download", %{id: id, name: id}, context)
+		{:noreply, data}
 	end
 
 	def handle_call({"torrent.download", %{id: id, name: name}, _context}, bot, data) do
