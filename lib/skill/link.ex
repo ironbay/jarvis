@@ -19,33 +19,37 @@ defmodule Jarvis.Link do
 	end
 
 	def handle_cast_async({"link.clean", body = %{url: url}, context}, bot, data) do
-		key = UUID.descending()
-		hierarchy = Bot.call(bot, "context.path", context)
-		case Delta.query_path(["link:info", url]) === %{} do
-			true ->
-				mutation =
-					Mutation.new
-					|> Mutation.merge(["link:info", url], body)
-				{_, mutation} =
-					hierarchy
-					|> Enum.reduce({[], mutation}, fn item, {path, mutation} ->
-						path = path ++ [item]
-						{
-							path,
-							mutation
-							|> Mutation.merge(["context:links", Enum.join(path, ":"), key], %{
-								key: key,
-								url: url,
-								created: :os.system_time(:millisecond),
-								context: context,
-							})
-						}
-					end)
-				Delta.mutation(mutation)
-			_ ->
-				Bot.cast(bot, "bot.message", "You're ruining everything with your reposts", context)
+		cond do
+			Delta.query_path(["link:info", url]) === %{} ->
+				bot
+				|> Bot.call("context.path", context)
+				|> save_link(body, context)
+			true -> Bot.cast(bot, "bot.message", "You're ruining everything with your reposts", context)
 		end
 		:ok
+	end
+
+	defp save_link(hierarchy, body = %{url: url}, context) do
+		key = UUID.descending()
+		mutation =
+			Mutation.new
+			|> Mutation.merge(["link:info", url], body)
+		{_, mutation} =
+			hierarchy
+			|> Enum.reduce({[], mutation}, fn item, {path, mutation} ->
+				path = path ++ [item]
+				{
+					path,
+					mutation
+					|> Mutation.merge(["context:links", Enum.join(path, ":"), key], %{
+						key: key,
+						url: url,
+						created: :os.system_time(:millisecond),
+						context: context,
+					})
+				}
+			end)
+		Delta.mutation(mutation)
 	end
 
 	defp clean_url(url) do
