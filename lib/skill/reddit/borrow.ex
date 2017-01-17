@@ -2,7 +2,7 @@ defmodule Jarvis.Borrow do
 	use Bot.Skill
 	alias Delta.Dynamic
 
-	@interval 1000 * 5
+	@interval 1000 * 30
 
 	def begin(bot, []) do
 		Bot.cast(bot, "locale.add", {"borrow.loan", ">>> Request: $<%= request %>\nReturn: $<%= return %>\nhttps://www.reddit.com/r/borrow/comments/<%= id %>"})
