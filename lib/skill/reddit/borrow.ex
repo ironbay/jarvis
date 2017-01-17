@@ -5,10 +5,10 @@ defmodule Jarvis.Borrow do
 	@interval 1000 * 5
 
 	def begin(bot, []) do
-		Bot.cast(bot, "locale.add", {"borrow.loan", ">>> Request: <%= request %>\nReturn: $<%= return || \"Unknown\" %>\nhttps://www.reddit.com/r/borrow/comments/<%= id %>"})
+		Bot.cast(bot, "locale.add", {"borrow.loan", ">>> Request: $<%= request %>\nReturn: $<%= return %>\nhttps://www.reddit.com/r/borrow/comments/<%= id %>"})
 		schedule(@interval)
 		{:ok, %{
-			last: poll(bot, 0)
+			last: 1
 		}}
 	end
 
