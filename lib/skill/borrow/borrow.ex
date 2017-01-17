@@ -3,9 +3,21 @@ defmodule Jarvis.Borrow do
 	alias Delta.Dynamic
 
 	@interval 1000 * 10
+	@template "
+Hey,
+
+I'd definitely be interested in lending to you. Can you email the following to loans@ironbay.digital and I'll send you the money ASAP
+
+- Social media verification - Facebook, twitter, etc?
+- A picture of a form of ID, preferably driver's license
+- Your PayPal information
+- Your phone number
+
+Thanks!
+"
 
 	def begin(bot, []) do
-		Bot.cast(bot, "locale.add", {"borrow.loan", ">>> Author: <%= author %>\nRequest: $<%= request %>\nReturn: $<%= return %>\n <%= paid.count %> paid loans totalling $<%= paid.value %>\n <%= unpaid.count %> unpaid loans totalling $<%= unpaid.value %>\nhttps://www.reddit.com/r/borrow/comments/<%= id %>"})
+		Bot.cast(bot, "locale.add", {"borrow.loan", ">>> Author: <%= author %>\n<%= title %>\n <%= paid.count %> paid loans totalling $<%= paid.value %>\n <%= unpaid.count %> unpaid loans totalling $<%= unpaid.value %>\nhttps://www.reddit.com/r/borrow/comments/<%= id %>"})
 		schedule(@interval)
 		{:ok, %{
 			last: 0 |> fetch_since |> get_last || 0
@@ -32,6 +44,11 @@ defmodule Jarvis.Borrow do
 				team: "strange-loop",
 				type: "slack"
 			}))
+
+			requests
+			|> Enum.each(fn %{author: author} ->
+				Reddit.send(author, "Loan Request", @template)
+			end)
 		end
 
 		requests
