@@ -5,7 +5,7 @@ defmodule Jarvis.Borrow do
 	@interval 1000 * 30
 
 	def begin(bot, []) do
-		Bot.cast(bot, "locale.add", {"borrow.loan", ">>> Request: $<%= request %>\nReturn: $<%= return %>\nhttps://www.reddit.com/r/borrow/comments/<%= id %>"})
+		Bot.cast(bot, "locale.add", {"borrow.loan", ">>> Author: <%= author %>\nRequest: $<%= request %>\nReturn: $<%= return %>\n <%= paid.count %> paid loans totalling $<%= paid.value %>\n <%= unpaid.count %> unpaid loans totalling $<%= unpaid.value %>\nhttps://www.reddit.com/r/borrow/comments/<%= id %>"})
 		schedule(@interval)
 		{:ok, %{
 			last: poll(bot, 0)
@@ -23,7 +23,8 @@ defmodule Jarvis.Borrow do
 
 	defp poll(bot, last) do
 		requests =
-			HTTPoison.get!("https://www.reddit.com/r/borrow/new.json")
+			"https://www.reddit.com/r/borrow/new.json"
+			|> HTTPoison.get!
 			|> Map.get(:body)
 			|> Poison.decode!
 			|> Dynamic.get(["data", "children"])
@@ -34,12 +35,13 @@ defmodule Jarvis.Borrow do
 					title: Map.get(value, "title"),
 					description: Map.get(value, "selftext"),
 					time: Map.get(value, "created_utc"),
-					status: Map.get(value, "link_flair_text")
+					status: Map.get(value, "link_flair_text"),
+					author: Map.get(value, "author")
 				}
 			end)
 			|> Stream.filter(fn %{time: time} -> time > last end)
 			|> Stream.filter(fn %{title: title} -> String.starts_with?(title, "[REQ]") end)
-			|> Stream.filter(fn %{status: status} ->  end)
+			|> Stream.filter(fn %{status: status} -> status !== "Completed" end)
 			|> Stream.map(&parse/1)
 			|> Stream.filter(&(Map.get(&1, :request) !== nil))
 			|> Enum.to_list
@@ -63,9 +65,36 @@ defmodule Jarvis.Borrow do
 	defp parse(input) do
 		input
 		|> Map.merge(parse_amount(input))
+		|> Map.merge(pull_history(input))
 	end
 
-	defp pull_history() do
+	defp pull_history(%{author: author}) do
+		"https://redditloans.com/api/loans.php?format=3&limit=10&borrower_name=#{author}&include_deleted=0"
+		|> HTTPoison.get!
+		|> Map.get(:body)
+		|> Poison.decode!
+		|> Map.get("loans")
+		|> Enum.reduce(%{
+			paid: %{
+				count: 0,
+				value: 0,
+			},
+			unpaid: %{
+				count: 0,
+				value: 0,
+			}
+		}, fn  %{ "principal_cents" => amount, "unpaid" => unpaid }, collect ->
+			type =
+				case unpaid do
+					0 -> :paid
+					_ -> :unpaid
+				end
+			count = Dynamic.get(collect, [type, :count])
+			value = Dynamic.get(collect, [type, :value])
+			collect
+			|> Dynamic.put([type, :count], count + 1)
+			|> Dynamic.put([type, :value], value + amount / 100)
+		end)
 
 	end
 
