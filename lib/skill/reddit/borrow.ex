@@ -8,7 +8,7 @@ defmodule Jarvis.Borrow do
 		Bot.cast(bot, "locale.add", {"borrow.loan", ">>> Request: $<%= request %>\nReturn: $<%= return %>\nhttps://www.reddit.com/r/borrow/comments/<%= id %>"})
 		schedule(@interval)
 		{:ok, %{
-			last: 1
+			last: poll(bot, 0)
 		}}
 	end
 
