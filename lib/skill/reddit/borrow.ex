@@ -65,7 +65,7 @@ defmodule Jarvis.Borrow do
 	defp request?(title) do
 		title
 		|> String.downcase
-		|> String.contains("[req]")
+		|> String.contains?("[req]")
 	end
 
 	defp get_last(requests) do
