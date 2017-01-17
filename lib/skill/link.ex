@@ -10,6 +10,7 @@ defmodule Jarvis.Link do
 	end
 
 	def handle_cast_async({"link.raw", %{url: url}, context}, bot, data) do
+		IO.inspect(context)
 		data =
 			url
 			|> clean_url
