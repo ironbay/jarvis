@@ -32,11 +32,14 @@ defmodule Jarvis.Borrow do
 				%{
 					id: Map.get(value, "id"),
 					title: Map.get(value, "title"),
+					description: Map.get(value, "selftext"),
 					time: Map.get(value, "created_utc"),
+					status: Map.get(value, "link_flair_text")
 				}
 			end)
 			|> Stream.filter(fn %{time: time} -> time > last end)
 			|> Stream.filter(fn %{title: title} -> String.starts_with?(title, "[REQ]") end)
+			|> Stream.filter(fn %{status: status} ->  end)
 			|> Stream.map(&parse/1)
 			|> Stream.filter(&(Map.get(&1, :request) !== nil))
 			|> Enum.to_list
@@ -60,6 +63,10 @@ defmodule Jarvis.Borrow do
 	defp parse(input) do
 		input
 		|> Map.merge(parse_amount(input))
+	end
+
+	defp pull_history() do
+
 	end
 
 	defp parse_amount(input = %{title: title}) do
