@@ -2,7 +2,7 @@ defmodule Jarvis.Borrow do
 	use Bot.Skill
 	alias Delta.Dynamic
 
-	@interval 1000 * 30
+	@interval 1000 * 10
 
 	def begin(bot, []) do
 		Bot.cast(bot, "locale.add", {"borrow.loan", ">>> Author: <%= author %>\nRequest: $<%= request %>\nReturn: $<%= return %>\n <%= paid.count %> paid loans totalling $<%= paid.value %>\n <%= unpaid.count %> unpaid loans totalling $<%= unpaid.value %>\nhttps://www.reddit.com/r/borrow/comments/<%= id %>"})
@@ -18,6 +18,7 @@ defmodule Jarvis.Borrow do
 
 	def handle_info(:poll, bot, data) do
 		next = poll(bot, data.last)
+		schedule(@interval)
 		{:ok, Map.put(data, :last, next)}
 	end
 
