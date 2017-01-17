@@ -39,7 +39,6 @@ defmodule Jarvis.Borrow do
 		requests
 		|> Enum.each(&Bot.cast(bot, "borrow.loan", &1,  %{
 			channel: "G3T1J0QJK",
-			sender: "U0SFBTD3Q",
 			team: "strange-loop",
 			type: "slack"
 		}))
