@@ -56,11 +56,17 @@ defmodule Jarvis.Borrow do
 			}
 		end)
 		|> Stream.filter(fn %{time: time} -> time > since end)
-		|> Stream.filter(fn %{title: title} -> String.starts_with?(title, "[REQ]") end)
+		|> Stream.filter(fn %{title: title} -> request?(title) end)
 		|> Stream.filter(fn %{status: status} -> status !== "Completed" end)
 		|> Stream.map(&parse/1)
 		|> Stream.filter(&(Map.get(&1, :request) !== nil))
 		|> Enum.to_list
+	end
+
+	defp request?(title) do
+		title
+		|> String.downcase
+		|> String.contains("[req]")
 	end
 
 	defp get_last(requests) do
