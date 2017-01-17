@@ -8,7 +8,7 @@ defmodule Jarvis.Borrow do
 		Bot.cast(bot, "locale.add", {"borrow.loan", ">>> Author: <%= author %>\nRequest: $<%= request %>\nReturn: $<%= return %>\n <%= paid.count %> paid loans totalling $<%= paid.value %>\n <%= unpaid.count %> unpaid loans totalling $<%= unpaid.value %>\nhttps://www.reddit.com/r/borrow/comments/<%= id %>"})
 		schedule(@interval)
 		{:ok, %{
-			last: poll(bot, 0)
+			last: 0 |> fetch_since |> get_last || 0
 		}}
 	end
 
@@ -23,29 +23,7 @@ defmodule Jarvis.Borrow do
 	end
 
 	defp poll(bot, last) do
-		requests =
-			"https://www.reddit.com/r/borrow/new.json"
-			|> HTTPoison.get!
-			|> Map.get(:body)
-			|> Poison.decode!
-			|> Dynamic.get(["data", "children"])
-			|> Dynamic.default(%{})
-			|> Stream.map(fn %{"data" => value}->
-				%{
-					id: Map.get(value, "id"),
-					title: Map.get(value, "title"),
-					description: Map.get(value, "selftext"),
-					time: Map.get(value, "created_utc"),
-					status: Map.get(value, "link_flair_text"),
-					author: Map.get(value, "author")
-				}
-			end)
-			|> Stream.filter(fn %{time: time} -> time > last end)
-			|> Stream.filter(fn %{title: title} -> String.starts_with?(title, "[REQ]") end)
-			|> Stream.filter(fn %{status: status} -> status !== "Completed" end)
-			|> Stream.map(&parse/1)
-			|> Stream.filter(&(Map.get(&1, :request) !== nil))
-			|> Enum.to_list
+		requests = fetch_since(last)
 
 		if last !== 0 do
 			requests
@@ -56,9 +34,38 @@ defmodule Jarvis.Borrow do
 			}))
 		end
 
-		case requests
-			|> List.first do
-			nil -> last
+		requests
+		|> get_last || last
+	end
+
+	defp fetch_since(since) do
+		"https://www.reddit.com/r/borrow/new.json"
+		|> HTTPoison.get!
+		|> Map.get(:body)
+		|> Poison.decode!
+		|> Dynamic.get(["data", "children"])
+		|> Dynamic.default(%{})
+		|> Stream.map(fn %{"data" => value}->
+			%{
+				id: Map.get(value, "id"),
+				title: Map.get(value, "title"),
+				description: Map.get(value, "selftext"),
+				time: Map.get(value, "created_utc"),
+				status: Map.get(value, "link_flair_text"),
+				author: Map.get(value, "author")
+			}
+		end)
+		|> Stream.filter(fn %{time: time} -> time > since end)
+		|> Stream.filter(fn %{title: title} -> String.starts_with?(title, "[REQ]") end)
+		|> Stream.filter(fn %{status: status} -> status !== "Completed" end)
+		|> Stream.map(&parse/1)
+		|> Stream.filter(&(Map.get(&1, :request) !== nil))
+		|> Enum.to_list
+	end
+
+	defp get_last(requests) do
+		case List.first(requests) do
+			nil -> nil
 			%{time: time} -> time
 		end
 	end
@@ -66,10 +73,10 @@ defmodule Jarvis.Borrow do
 	defp parse(input) do
 		input
 		|> Map.merge(parse_amount(input))
-		|> Map.merge(pull_history(input))
+		|> Map.merge(fetch_history(input))
 	end
 
-	defp pull_history(%{author: author}) do
+	defp fetch_history(%{author: author}) do
 		"https://redditloans.com/api/loans.php?format=3&limit=10&borrower_name=#{author}&include_deleted=0"
 		|> HTTPoison.get!
 		|> Map.get(:body)
