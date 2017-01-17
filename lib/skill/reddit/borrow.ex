@@ -2,13 +2,13 @@ defmodule Jarvis.Borrow do
 	use Bot.Skill
 	alias Delta.Dynamic
 
-	@interval 1000 * 30
+	@interval 1000 * 5
 
 	def begin(bot, []) do
-		Bot.cast(bot, "locale.add", {"borrow.loan", ">>> Request: <%= request %>\nReturn: <%= return || \"Unknown\" %>\nhttps://www.reddit.com/r/borrow/comments/<%= id %>"})
-		schedule(0)
+		Bot.cast(bot, "locale.add", {"borrow.loan", ">>> Request: <%= request %>\nReturn: $<%= return || \"Unknown\" %>\nhttps://www.reddit.com/r/borrow/comments/<%= id %>"})
+		schedule(@interval)
 		{:ok, %{
-			last: 0
+			last: poll(bot, 0)
 		}}
 	end
 
@@ -17,6 +17,11 @@ defmodule Jarvis.Borrow do
 	end
 
 	def handle_info(:poll, bot, data) do
+		next = poll(bot, data.last)
+		{:ok, Map.put(data, :last, next)}
+	end
+
+	defp poll(bot, last) do
 		requests =
 			HTTPoison.get!("https://www.reddit.com/r/borrow/new.json")
 			|> Map.get(:body)
@@ -30,19 +35,26 @@ defmodule Jarvis.Borrow do
 					time: Map.get(value, "created_utc"),
 				}
 			end)
-			|> Stream.filter(fn %{time: time} -> time > data.last end)
+			|> Stream.filter(fn %{time: time} -> time > last end)
 			|> Stream.filter(fn %{title: title} -> String.starts_with?(title, "[REQ]") end)
 			|> Stream.map(&parse/1)
 			|> Stream.filter(&(Map.get(&1, :request) !== nil))
 			|> Enum.to_list
 
-		requests
-		|> Enum.each(&Bot.cast(bot, "borrow.loan", &1,  %{
-			channel: "G3T1J0QJK",
-			team: "strange-loop",
-			type: "slack"
-		}))
-		{:ok, Map.put(data, :last, requests |> List.first |> Map.get(:time))}
+		if last !== 0 do
+			requests
+			|> Enum.each(&Bot.cast(bot, "borrow.loan", &1,  %{
+				channel: "G3T1J0QJK",
+				team: "strange-loop",
+				type: "slack"
+			}))
+		end
+
+		case requests
+			|> List.first do
+			nil -> last
+			%{time: time} -> time
+		end
 	end
 
 	defp parse(input) do
