@@ -59,7 +59,6 @@ defmodule Jarvis.Borrow do
 		|> Stream.filter(fn %{title: title} -> request?(title) end)
 		|> Stream.filter(fn %{status: status} -> status !== "Completed" end)
 		|> Stream.map(&parse/1)
-		|> Stream.filter(&(Map.get(&1, :request) !== nil))
 		|> Enum.to_list
 	end
 
