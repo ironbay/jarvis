@@ -78,7 +78,6 @@ Thanks!
 		|> Stream.filter(fn %{status: status} -> status !== "Completed" end)
 		|> Stream.map(&parse/1)
 		|> Enum.to_list
-		|> IO.inspect
 	end
 
 	defp valid_title?(title) do
