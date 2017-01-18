@@ -3,7 +3,7 @@ defmodule Reddit do
 	@oauth "https://oauth.reddit.com"
 
 	defp token do
-		body = URI.encode_query([grant_type: "password", username: "-SwearWord-", password: "solodolo1?"])
+		body = URI.encode_query([grant_type: "password", username: "Fabagemaf06", password: "dOKNOkRLayOJ"])
 		"#{@root}/access_token"
 		|> HTTPoison.post!(body, [
 			{"Authorization", "Basic RXpzbXIyZk1PVUs2VEE6Z3o5Z0ViQllBcDVrOGlheDBjS1lVeFoyUExB"} | headers

@@ -12,6 +12,7 @@ I'd definitely be interested in lending to you. Can you email the following to l
 - A picture of a form of ID, preferably driver's license
 - Your PayPal information
 - Your phone number
+- Your email
 
 Thanks!
 "
@@ -73,16 +74,16 @@ Thanks!
 			}
 		end)
 		|> Stream.filter(fn %{time: time} -> time > since end)
-		|> Stream.filter(fn %{title: title} -> request?(title) end)
+		|> Stream.filter(fn %{title: title} -> valid_title?(title) end)
 		|> Stream.filter(fn %{status: status} -> status !== "Completed" end)
 		|> Stream.map(&parse/1)
 		|> Enum.to_list
+		|> IO.inspect
 	end
 
-	defp request?(title) do
-		title
-		|> String.downcase
-		|> String.contains?("[req]")
+	defp valid_title?(title) do
+		lower = title |> String.downcase
+		String.contains?(lower, "[req]") && !String.contains?(lower, "arranged")
 	end
 
 	defp get_last(requests) do
