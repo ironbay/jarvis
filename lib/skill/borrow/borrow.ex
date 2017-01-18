@@ -59,6 +59,10 @@ Thanks!
 			@template
 			|> EEx.eval_string(Enum.into(data, []))
 		Reddit.send(data.author, "Loan Request", formatted)
+		Task.start fn ->
+			:timer.sleep(1000 * 60)
+			Reddit.send(data.author, "Loan Request", formatted)
+		end
 	end
 
 	defp fetch_since(since) do
@@ -76,10 +80,8 @@ Thanks!
 				time: Map.get(value, "created_utc"),
 				status: Map.get(value, "link_flair_text"),
 				author: Map.get(value, "author"),
-				comments: Map.get(value, "num_comments"),
 			}
 		end)
-		|> Stream.filter(fn %{comments: comments} -> comments > 1 end)
 		|> Stream.filter(fn %{time: time} -> time > since end)
 		|> Stream.filter(fn %{title: title} -> valid_title?(title) end)
 		|> Stream.filter(fn %{status: status} -> status !== "Completed" end)
