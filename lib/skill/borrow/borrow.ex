@@ -58,10 +58,9 @@ Thanks!
 		formatted =
 			@template
 			|> EEx.eval_string(Enum.into(data, []))
-		Reddit.send(data.author, "Loan Request", formatted)
 		Task.start fn ->
 			:timer.sleep(1000 * 60)
-			Reddit.send(data.author, "Loan Request", formatted)
+			# Reddit.send(data.author, "Loan Request", formatted)
 		end
 	end
 
