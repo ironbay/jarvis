@@ -6,7 +6,7 @@ defmodule Jarvis.Borrow do
 	@template "
 Hey,
 
-I'd definitely be interested in lending to you, I'm looking for 15% interest. Can you email the following to loans@ironbay.digital and I'll send you the money ASAP
+I'd definitely be interested in lending to you, I'm looking for 15% interest. Can you email the following to loans@ironbay.digital for verification?
 
 - Social media verification - Facebook, twitter, etc?
 - A picture of a form of ID, preferably driver's license
@@ -14,6 +14,7 @@ I'd definitely be interested in lending to you, I'm looking for 15% interest. Ca
 - Your phone number
 - Your email
 
+Once I get this I'll go ahead and send you the money
 Thanks!
 "
 
