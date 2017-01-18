@@ -4,11 +4,10 @@ defmodule Jarvis.Borrow do
 
 	@interval 1000 * 10
 	@template "
-Hey,
+Hey <%= author %>
 
-I'd definitely be interested in lending to you, I'm looking for 15% interest. Can you email the following to loans@ironbay.digital for verification?
+I'm interested in lending to you,  Can you email the following to loans@ironbay.digital for verification?
 
-- Social media verification - Facebook, twitter, etc?
 - A picture of a form of ID, preferably driver's license
 - Your PayPal information
 - Your phone number
@@ -48,13 +47,18 @@ Thanks!
 			}))
 
 			requests
-			|> Enum.each(fn %{author: author} ->
-				Reddit.send(author, "Loan Request", @template)
-			end)
+			|> Enum.each(&send_pm/1)
 		end
 
 		requests
 		|> get_last || last
+	end
+
+	def send_pm(data) do
+		formatted =
+			@template
+			|> EEx.eval_string(Enum.into(data, []))
+		Reddit.send(data.author, "Loan Request", formatted)
 	end
 
 	defp fetch_since(since) do
