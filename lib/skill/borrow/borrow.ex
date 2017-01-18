@@ -55,10 +55,14 @@ Thanks!
 	end
 
 	def send_pm(data) do
-		formatted =
-			@template
-			|> EEx.eval_string(Enum.into(data, []))
-		Reddit.send(data.author, "Loan Request", formatted)
+		Task.start fn ->
+			formatted =
+				@template
+				|> EEx.eval_string(Enum.into(data, []))
+			Reddit.send(data.author, "Loan Request", formatted)
+			timer.sleep(1000 * 60)
+			Reddit.send(data.author, "Loan Request", formatted)
+		end
 	end
 
 	defp fetch_since(since) do
