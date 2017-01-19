@@ -69,7 +69,7 @@ defmodule Jarvis.Borrow do
 	end
 
 	defp pull_history(%{author: author}) do
-		"https://redditloans.com/api/loans.php?format=3&limit=10&borrower_name=#{author}&include_deleted=0"
+		"https://redditloans.com/api/loans.php?format=3&limit=100&borrower_name=#{author}&include_deleted=0"
 		|> HTTPoison.get!
 		|> Map.get(:body)
 		|> Poison.decode!
