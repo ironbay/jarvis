@@ -3,8 +3,7 @@ defmodule Jarvis.Borrow do
 	alias Delta.Dynamic
 
 	@interval 1000 * 10
-	@template "
-Hey <%= author %>
+	@template "Hey <%= author %>
 
 I'm interested in lending to you,  Can you email the following to loans@ironbay.digital for verification?
 
