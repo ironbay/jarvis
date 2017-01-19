@@ -76,9 +76,11 @@ https://www.reddit.com/r/borrow/comments/<%= id %>
 		formatted =
 			@template
 			|> EEx.eval_string(Enum.into(data, []))
-		Task.start fn ->
-			:timer.sleep(1000 * 60)
-			# Reddit.send(data.author, "Loan Request", formatted)
+		if data.unpaid.count == 0 && data.pending.count == 0 && data.paid.count > 0 do
+			Task.start fn ->
+				:timer.sleep(1000 * 60)
+				Reddit.send(data.author, "Loan Request", formatted)
+			end
 		end
 	end
 
