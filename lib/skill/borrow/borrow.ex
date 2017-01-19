@@ -18,7 +18,20 @@ Thanks!
 "
 
 	def begin(bot, []) do
-		Bot.cast(bot, "locale.add", {"borrow.loan", ">>> Author: <%= author %>\n<%= title %>\n <%= paid.count %> paid loans totalling $<%= paid.value %>\n <%= unpaid.count %> unpaid loans totalling $<%= unpaid.value %>\nhttps://www.reddit.com/r/borrow/comments/<%= id %>"})
+		Bot.cast(bot, "regex.add", {"^borrow history (?P<author>.+)", "borrow.history.request"})
+		Bot.cast(bot, "locale.add", {"borrow.loan", ">>>
+Author: <%= author %>
+<%= title %>
+<%= paid.count %> paid loans totalling $<%= paid.value %>
+<%= unpaid.count %> unpaid loans totalling $<%= unpaid.value %>
+<%= pending.count %> pending loans totalling $<%= pending.value %>
+https://www.reddit.com/r/borrow/comments/<%= id %>
+"})
+		Bot.cast(bot, "locale.add", {"borrow.history", ">>>
+<%= paid.count %> paid loans totalling $<%= paid.value %>
+<%= unpaid.count %> unpaid loans totalling $<%= unpaid.value %>
+<%= pending.count %> pending loans totalling $<%= pending.value %>
+"})
 		schedule(@interval)
 		{:ok, %{
 			last: 0 |> fetch_since |> get_last || 0
@@ -33,6 +46,11 @@ Thanks!
 		next = poll(bot, data.last)
 		schedule(@interval)
 		{:ok, Map.put(data, :last, next)}
+	end
+
+	def handle_cast({"borrow.history.request", body, context}, bot, data) do
+		Bot.cast(bot, "borrow.history", fetch_history(body), context)
+		:ok
 	end
 
 	defp poll(bot, last) do
@@ -117,21 +135,26 @@ Thanks!
 				count: 0,
 				value: 0,
 			},
+			pending: %{
+				count: 0,
+				value: 0,
+			},
 			unpaid: %{
 				count: 0,
 				value: 0,
 			}
-		}, fn  %{ "principal_cents" => amount, "unpaid" => unpaid }, collect ->
+		}, fn  %{ "principal_cents" => lent, "principal_repayment_cents" => paid, "unpaid" => unpaid }, collect ->
 			type =
-				case unpaid do
-					0 -> :paid
-					_ -> :unpaid
+				cond do
+					unpaid == 1 -> :unpaid
+					lent == paid -> :paid
+					true -> :pending
 				end
 			count = Dynamic.get(collect, [type, :count])
 			value = Dynamic.get(collect, [type, :value])
 			collect
 			|> Dynamic.put([type, :count], count + 1)
-			|> Dynamic.put([type, :value], value + amount / 100)
+			|> Dynamic.put([type, :value], value + lent / 100)
 		end)
 
 	end
