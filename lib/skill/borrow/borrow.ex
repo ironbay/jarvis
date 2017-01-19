@@ -7,7 +7,6 @@ defmodule Jarvis.Borrow do
 
 I'm interested in lending to you,  Can you email the following to loans@ironbay.digital for verification?
 
-- A picture of a form of ID, preferably driver's license
 - Your PayPal information
 - Your phone number
 - Your email
