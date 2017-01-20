@@ -5,11 +5,12 @@ defmodule Jarvis.Borrow do
 	@interval 1000 * 10
 	@template "Hey <%= author %>
 
-I'm interested in lending to you,  Can you email the following to loans@ironbay.digital for verification?
+I'm interested in lending to you,  Can reply with the following
 
 - Your PayPal information
 - Your phone number
 - Your email
+- Date you will repay
 
 Once I get this I'll go ahead and send you the money
 Thanks!
@@ -125,7 +126,7 @@ https://www.reddit.com/r/borrow/comments/<%= id %>
 	end
 
 	defp fetch_history(%{author: author}) do
-		"https://redditloans.com/api/loans.php?format=3&limit=10&borrower_name=#{author}&include_deleted=0"
+		"https://redditloans.com/api/loans.php?format=3&limit=100&borrower_name=#{author}&include_deleted=0"
 		|> HTTPoison.get!
 		|> Map.get(:body)
 		|> Poison.decode!
