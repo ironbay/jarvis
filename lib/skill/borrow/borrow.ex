@@ -5,7 +5,7 @@ defmodule Jarvis.Borrow do
 	@interval 1000 * 10
 	@template "Hey <%= author %>
 
-I'm interested in lending the <%= request %> you asked for.  I'm only looking for 15% which is <%= request * 1.15 %> in payback - less than most lenders here.  Can you reply with the following?
+I'm interested in lending the <%= request %> you asked for.  I'm only looking for 15% interest which is <%= request * 1.15 %> in payback - less than most lenders here.  Can you reply with the following?
 
 - Your PayPal information
 - Your phone number
