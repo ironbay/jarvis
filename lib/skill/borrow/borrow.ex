@@ -5,7 +5,7 @@ defmodule Jarvis.Borrow do
 	@interval 1000 * 10
 	@template "Hey <%= author %>
 
-I'm interested in lending to you,  Can reply with the following
+I'm interested in lending the <%= request %> you asked for.  I'm only looking for 15% which is <%= request * 1.15 %> in payback - less than most lenders here.  Can you reply with the following?
 
 - Your PayPal information
 - Your phone number
@@ -20,11 +20,12 @@ Thanks!
 		Bot.cast(bot, "regex.add", {"^borrow history (?P<author>.+)", "borrow.history.request"})
 		Bot.cast(bot, "locale.add", {"borrow.loan", ">>>
 Author: <%= author %>
+Request: <%= request %>
 <%= title %>
 <%= paid.count %> paid loans totalling $<%= paid.value %>
 <%= unpaid.count %> unpaid loans totalling $<%= unpaid.value %>
 <%= pending.count %> pending loans totalling $<%= pending.value %>
-https://www.reddit.com/r/borrow/comments/<%= id %>
+https://www.reddit.com/r/borrow/comments/<%= key %>
 "})
 		Bot.cast(bot, "locale.add", {"borrow.history", ">>>
 <%= paid.count %> paid loans totalling $<%= paid.value %>
@@ -64,18 +65,27 @@ https://www.reddit.com/r/borrow/comments/<%= id %>
 			}))
 
 			requests
+			|> Enum.each(&save/1)
+
+			requests
 			|> Enum.each(&send_pm/1)
+
 		end
 
 		requests
 		|> get_last || last
 	end
 
+	defp save(data) do
+		Delta.merge(["loan:info", data.key], data)
+	end
+
 	def send_pm(data) do
 		formatted =
 			@template
 			|> EEx.eval_string(Enum.into(data, []))
-		if data.unpaid.count == 0 && data.pending.count == 0 && data.paid.count > 0 do
+		Delta.merge(["loan:info", data.key, "pm"], true)
+		if data.unpaid.count == 0 && data.pending.count == 0 && data.paid.count > 0 && data.request >= 150 do
 			Task.start fn ->
 				:timer.sleep(1000 * 60)
 				Reddit.send(data.author, "Loan Request", formatted)
@@ -92,7 +102,7 @@ https://www.reddit.com/r/borrow/comments/<%= id %>
 		|> Dynamic.default(%{})
 		|> Stream.map(fn %{"data" => value}->
 			%{
-				id: Map.get(value, "id"),
+				key: Map.get(value, "id"),
 				title: Map.get(value, "title"),
 				description: Map.get(value, "selftext"),
 				time: Map.get(value, "created_utc"),
@@ -100,10 +110,10 @@ https://www.reddit.com/r/borrow/comments/<%= id %>
 				author: Map.get(value, "author"),
 			}
 		end)
+		|> Stream.map(&parse/1)
 		|> Stream.filter(fn %{time: time} -> time > since end)
 		|> Stream.filter(fn %{title: title} -> valid_title?(title) end)
 		|> Stream.filter(fn %{status: status} -> status !== "Completed" end)
-		|> Stream.map(&parse/1)
 		|> Enum.to_list
 	end
 
@@ -161,17 +171,21 @@ https://www.reddit.com/r/borrow/comments/<%= id %>
 	end
 
 	defp parse_amount(input = %{title: title}) do
-		case parse_amount(title) do
-			[request, return] -> %{
-				request: request,
-				return: return,
-			}
-			[request] -> %{
-				request: request,
-				return: nil,
-			}
-			_ -> %{}
-		end
+		match =
+			~r/\([^\d]*(\d+)[^\d]*\)/
+			|> Regex.run(title)
+			|> Dynamic.default([])
+			|> List.last
+			|> Dynamic.default("0")
+			|> Integer.parse
+		request =
+			case match do
+				:error -> 0
+				{parsed, _} -> parsed
+			end
+		%{
+			request: request
+		}
 	end
 
 	defp parse_amount(title) do
