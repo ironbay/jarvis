@@ -1,8 +1,19 @@
 FROM ironbay/elixir:master
-# FROM ironbay/jarvis:elixir
+
+ENV MIX_ENV=prod
+RUN pacman --noconfirm -S gcc
+RUN pacman --noconfirm -S cmake
+
 
 ADD . .
 RUN mix deps.get
+RUN mix clean
 RUN mix compile
+# RUN mix release
+# ADD vm.args ./apps/server/rel/server/running-config/vm.args
 
-CMD iex --cookie server --name jarvis@100.33.127.192 -S mix
+
+ADD run run
+EXPOSE 4001
+
+CMD iex -S mix
