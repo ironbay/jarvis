@@ -7,6 +7,7 @@ RUN pacman --noconfirm -S cmake
 
 WORKDIR /tmp
 ADD mix.exs mix.exs
+ADD mix.lock mix.lock
 ADD config config
 RUN mix deps.get
 RUN mix deps.compile
