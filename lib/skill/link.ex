@@ -20,12 +20,13 @@ defmodule Jarvis.Link do
 	end
 
 	def handle_cast_async({"link.clean", body = %{url: url}, context}, bot, data) do
-		cond do
-			Delta.query_path(["link:info", url]) === %{} ->
+		case Delta.query_path(["link:info", url]) do
+			%{} ->
 				bot
 				|> Bot.call("context.path", context)
 				|> save_link(body, context)
-			true -> Bot.cast(bot, "bot.message", "You're ruining everything with your reposts", context)
+			true ->
+				# Bot.cast(bot, "bot.message", "You're ruining everything with your reposts", context)
 		end
 		:ok
 	end
