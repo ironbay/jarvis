@@ -37,7 +37,7 @@ defmodule Jarvis.Media.Download do
 			|> Floki.find("#torrenttable tbody tr")
 			|> Stream.map(&parse_row(&1))
 			|> Stream.with_index
-			|> Stream.take(3)
+			|> Stream.take(5)
 			|> Enum.to_list
 
 		case Enum.count(options) do
