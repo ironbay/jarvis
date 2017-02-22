@@ -1,8 +1,10 @@
 defmodule Jarvis.Context do
 	use Bot.Skill
 	alias Delta.Mutation
+	alias Delta.Dynamic
 
-	def begin(_bot, _args) do
+	def begin(bot, _args) do
+		Bot.cast(bot, "regex.add", {"^reaction stats$", "slack.reaction.request"})
 		{:ok, %{}}
 	end
 
@@ -14,6 +16,25 @@ defmodule Jarvis.Context do
 		|> Delta.mutation
 
 
+		{:noreply, state}
+	end
+
+	def handle_cast_async({"chat.reaction", %{target: target, type: type},  context = %{sender: sender}}, _bot, state) when sender !== target do
+		type = String.split(type, "::") |> List.first
+		path = ["slack:reactions", context.team, target, type]
+		previous = path |> Delta.query_path |> Dynamic.default(%{}, 0)
+		Delta.merge(path, previous + 1)
+		{:noreply, state}
+	end
+
+	def handle_cast_async({"slack.reaction.request", _, context}, bot, state) do
+		result =
+			["slack:reactions", context.team, context.sender]
+			|> Delta.query_path
+			|> Enum.sort_by(fn {key, value} -> value end, &>=/2)
+			|> Stream.map(fn {key, value} -> ":#{key}: - #{value}" end)
+			|> Enum.join("\n")
+		Bot.cast(bot, "bot.message", result, context)
 		{:noreply, state}
 	end
 
