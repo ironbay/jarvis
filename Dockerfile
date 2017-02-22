@@ -4,7 +4,6 @@ FROM ironbay/elixir:master
 RUN pacman --noconfirm -S gcc
 RUN pacman --noconfirm -S libuv
 RUN pacman --noconfirm -S cmake
-RUN pacman --noconfirm -S c++
 
 WORKDIR /tmp
 ADD mix.exs mix.exs
