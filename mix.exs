@@ -38,7 +38,7 @@ defmodule Jarvis.Mixfile do
 		{:neo4j_sips, "~> 0.2"},
 		{:plug, "~> 1.0"},
 		{:cowboy, "~> 1.0.3"},
-        	{:postgrex, "~> 1.0.0-rc.1"},
+		{:postgrex, "~> 1.0.0-rc.1"},
 		{:delta, github: "ironbay/delta-elixir"},
 		# {:delta, path: "~/dev/ironbay/delta-elixir", only: [:dev]},
 		{:credo, "~> 0.5", only: [:dev, :test]},
